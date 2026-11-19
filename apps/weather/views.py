@@ -149,8 +149,6 @@ def multi_day_prediction_data(request):
         return _error("A valid active location is required.", 404)
     try:
         feature_date = _parse_date(request.GET.get("feature_date"), "feature_date")
-        if feature_date is None:
-            raise ValueError("feature_date is required and must use YYYY-MM-DD format.")
         horizon_days = int(request.GET.get("horizon", "5"))
         if not 1 <= horizon_days <= 5:
             raise ValueError("horizon must be an integer from 1 through 5.")
@@ -168,7 +166,7 @@ def multi_day_prediction_data(request):
         {
             "location": location.slug,
             "location_name": location.name,
-            "feature_date": feature_date.isoformat(),
+            "feature_date": forecasts[0]["feature_date"] if forecasts else None,
             "horizon_days": horizon_days,
             "records": forecasts,
         }

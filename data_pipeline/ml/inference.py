@@ -74,6 +74,15 @@ def prepare_features_for_feature_date(history: pd.DataFrame, feature_date) -> pd
     return selected.tail(1)
 
 
+def latest_complete_feature_date(history: pd.DataFrame):
+    """Return the latest date with complete model inputs available."""
+    engineered = build_feature_frame(history)
+    usable = engineered.dropna(subset=FEATURE_COLUMNS)
+    if usable.empty:
+        raise ValueError("History does not contain enough complete observations for inference.")
+    return usable["feature_date"].max().date()
+
+
 def predict_multi_horizon_with_bundle(
     bundle: dict,
     history: pd.DataFrame,
@@ -85,8 +94,12 @@ def predict_multi_horizon_with_bundle(
         raise ValueError("max_horizon_days must be between 1 and 5.")
     if not isinstance(bundle, dict) or bundle.get("model_type") != "direct_multi_horizon":
         raise ValueError("A direct multi-horizon model bundle is required.")
-    row = prepare_features_for_feature_date(history, feature_date)
-    feature_date_value = pd.Timestamp(feature_date).date()
+    feature_date_value = (
+        latest_complete_feature_date(history)
+        if feature_date is None
+        else pd.Timestamp(feature_date).date()
+    )
+    row = prepare_features_for_feature_date(history, feature_date_value)
     results = []
     for horizon in range(1, max_horizon_days + 1):
         model_entry = bundle["models"].get(str(horizon))

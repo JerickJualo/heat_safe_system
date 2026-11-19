@@ -101,7 +101,7 @@ The prediction page also supports a bounded five-day forecast. Run the direct mu
 .\.venv\Scripts\python.exe scripts\train_multi_horizon_model.py
 ```
 
-This creates separate direct models for horizons 1 through 5 in `models/phase4/heat_index_multi_horizon_model.joblib`. Each model uses only information available on the selected feature date and does not fabricate future weather observations. On the website, select a complete feature date and click **Generate five-day forecast** to view the following five target dates.
+This creates separate direct models for horizons 1 through 5 in `models/phase4/heat_index_multi_horizon_model.joblib`. Each model uses only information available on the selected feature date and does not fabricate future weather observations. On the website, select a location and the system automatically uses that location's latest complete feature date to display the following five target dates.
 
 ## Django backend and database import
 

@@ -10,7 +10,7 @@ Base URL during local development: `http://127.0.0.1:8000/api/`.
 | GET | `/dashboard/` | Active locations, latest complete summaries, predictions |
 | GET | `/analytics/` | Complete daily summaries with optional `location`, `start_date`, `end_date`, `limit` |
 | GET | `/predictions/` | Stored predictions with optional `location` and `limit` |
-| GET | `/predictions/forecast/` | Direct forecast for horizons 1–5 from a selected `location` and `feature_date` |
+| GET | `/predictions/forecast/` | Direct forecast for horizons 1–5 from a `location`; latest complete feature date is used by default |
 | POST | `/predictions/generate/` | Generate/store current predictions using the saved model; CSRF protected |
 | GET | `/locations/compare/` | Same-date complete summaries; optional `date` |
 | GET | `/report/` | Database counts, source attribution, methodology, limitations, evaluations |
@@ -24,14 +24,16 @@ Base URL during local development: `http://127.0.0.1:8000/api/`.
 - Unknown or inactive locations return HTTP 404.
 - Analytics limits are bounded to 1–10,000.
 - Prediction limits are bounded to 1–365.
-- Forecast horizons are bounded to 1–5 days. The forecast requires a complete feature date and does not use future weather observations.
+- Forecast horizons are bounded to 1–5 days. The forecast automatically uses the latest complete feature date for the selected location and does not use future weather observations.
 - Invalid parameters return JSON errors rather than database exceptions.
 
 Example:
 
 ```text
-/predictions/forecast/?location=surigao_city&feature_date=2026-11-13&horizon=5
+/predictions/forecast/?location=surigao_city&horizon=5
 ```
+
+The optional `feature_date=YYYY-MM-DD` parameter remains available for controlled historical testing and auditing; it is not exposed as a filter on the website.
 
 ## Sources and attribution
 

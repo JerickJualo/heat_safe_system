@@ -41,7 +41,7 @@ The saved artifact is `models/phase4/heat_index_next_day_model.joblib`. Running 
 
 ## Five-day direct forecast extension
 
-The prediction page supports horizons 1 through 5 using direct models saved in `models/phase4/heat_index_multi_horizon_model.joblib`. One Linear Regression model is trained separately for each horizon. The target for horizon `h` is the maximum daytime heat index exactly `h` calendar days after the selected feature date.
+The prediction page supports horizons 1 through 5 using direct models saved in `models/phase4/heat_index_multi_horizon_model.joblib`. One Linear Regression model is trained separately for each horizon. The target for horizon `h` is the maximum daytime heat index exactly `h` calendar days after the latest complete feature date available for the selected location.
 
 The five-day models use the same leakage-aware current-day, lag, rolling, seasonal, and location features. They do not recursively insert predicted values as if they were observations, and they do not require future weather inputs. The extension is trained with:
 

@@ -301,8 +301,9 @@ def generate_multi_day_forecast(location: Location, feature_date, horizon_days: 
     history = daily[daily["location_slug"] == location.slug].copy()
     if history.empty:
         raise ValueError(f"No processed daily history is available for {location.name}.")
-    selected_date = pd.Timestamp(feature_date).date()
-    history = history[pd.to_datetime(history["local_date"], errors="coerce").dt.date <= selected_date]
+    selected_date = None if feature_date is None else pd.Timestamp(feature_date).date()
+    if selected_date is not None:
+        history = history[pd.to_datetime(history["local_date"], errors="coerce").dt.date <= selected_date]
     bundle = load_multi_horizon_bundle(MULTI_HORIZON_MODEL_PATH)
     forecasts = predict_multi_horizon_with_bundle(bundle, history, selected_date, horizon_days)
     for forecast in forecasts:

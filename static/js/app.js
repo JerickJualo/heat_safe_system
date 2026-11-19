@@ -217,8 +217,7 @@
     }
 
     async function initPrediction() {
-        const loading = $("#prediction-loading"), error = $("#prediction-error"), select = $("#prediction-location");
-        const dateInput = $("#prediction-feature-date"), apply = $("#prediction-apply"), card = $("#prediction-card");
+        const loading = $("#prediction-loading"), error = $("#prediction-error"), select = $("#prediction-location"), card = $("#prediction-card");
         const forecastPanel = $("#prediction-forecast-panel"), forecastTable = $("#prediction-forecast-table");
         setLoading(loading, true);
         try {
@@ -231,19 +230,17 @@
             const renderStoredHistory = () => {
                 const filtered = records.filter(record => !select.value || record.location === select.value);
                 $("#prediction-table").innerHTML = filtered.map(record => `<tr><td>${escapeHtml(record.location_name)}</td><td>${formatDate(record.feature_date)}</td><td>${formatDate(record.target_date)}</td><td>${formatHeat(record.predicted_heat_index_celsius)}</td><td>${escapeHtml(record.model_name)}</td></tr>`).join("") || '<tr><td colspan="5">No stored prediction records match this selection.</td></tr>';
-                const latest = filtered[0];
-                if (latest && !dateInput.value) dateInput.value = latest.feature_date;
             };
 
             const loadForecast = async () => {
                 hide(error);
-                if (!select.value || !dateInput.value) {
-                    showError(error, "Select a location and feature date first.");
+                if (!select.value) {
+                    showError(error, "Select a location first.");
                     return;
                 }
                 setLoading(loading, true);
                 try {
-                    const params = new URLSearchParams({ location: select.value, feature_date: dateInput.value, horizon: "5" });
+                    const params = new URLSearchParams({ location: select.value, horizon: "5" });
                     const forecast = await fetchJson(`/predictions/forecast/?${params.toString()}`);
                     const rows = forecast.records || [];
                     const first = rows[0];
@@ -264,11 +261,9 @@
 
             renderStoredHistory();
             select.addEventListener("change", () => {
-                dateInput.value = records.find(record => record.location === select.value)?.feature_date || "";
                 renderStoredHistory();
                 loadForecast();
             });
-            apply.addEventListener("click", loadForecast);
             await loadForecast();
         } catch (requestError) { showError(error, requestError.message); }
         finally { setLoading(loading, false); }
