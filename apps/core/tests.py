@@ -8,6 +8,8 @@ class FrontendPageTests(TestCase):
             "/analytics/": "Data Analytics",
             "/prediction/": "Heat Index Prediction",
             "/comparison/": "Location Comparison",
+            "/performance/": "Model Performance",
+            "/reports/": "Reports &amp; Sources",
         }
         for path, title in pages.items():
             with self.subTest(path=path):

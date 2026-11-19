@@ -1,0 +1,12 @@
+{% extends "core/base.html" %}
+{% block content %}
+<section class="page-heading"><div><p class="eyebrow">MODEL PERFORMANCE</p><h1>Measure what the model gets right.</h1><p class="page-subtitle">Review validation and held-out test metrics for the candidate models, plus actual-versus-predicted values from the selected model.</p></div><div class="data-source-chip"><span class="status-dot"></span>Evaluation artifacts</div></section>
+<div class="loading-state" id="performance-loading"><span class="spinner"></span> Loading model evaluation…</div><div class="error-state" id="performance-error" hidden></div>
+<section class="metric-grid metric-grid-four" aria-live="polite">
+    <article class="metric-card"><span class="metric-label">Selected model</span><strong class="metric-value-text" id="performance-selected-model">—</strong><span class="metric-caption">Chosen using validation MAE</span></article>
+    <article class="metric-card"><span class="metric-label">Test MAE</span><strong id="performance-test-mae">—</strong><span class="metric-caption">Mean absolute error</span></article>
+    <article class="metric-card"><span class="metric-label">Test RMSE</span><strong id="performance-test-rmse">—</strong><span class="metric-caption">Root mean squared error</span></article>
+    <article class="metric-card metric-card-hot"><span class="metric-label">Test R²</span><strong id="performance-test-r2">—</strong><span class="metric-caption">Held-out test fit</span></article>
+</section>
+<section class="content-grid performance-grid"><article class="panel panel-wide"><div class="panel-heading"><div><p class="eyebrow">MODEL COMPARISON</p><h2>Candidate metrics</h2></div><span class="panel-meta">Actual training evaluation records</span></div><div class="table-wrap"><table><thead><tr><th>Model</th><th>Split</th><th>Rows</th><th>MAE</th><th>RMSE</th><th>R²</th></tr></thead><tbody id="performance-metrics-table"></tbody></table></div></article><article class="panel"><div class="panel-heading"><div><p class="eyebrow">ERROR VIEW</p><h2>Actual vs predicted</h2></div><span class="panel-meta" id="performance-prediction-count">—</span></div><div class="chart-frame chart-frame-short" id="performance-scatter-chart"></div><p class="chart-note">Each point is an actual held-out test prediction. The diagonal represents perfect agreement.</p></article></section>
+{% endblock %}

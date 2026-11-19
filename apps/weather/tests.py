@@ -85,3 +85,14 @@ class WeatherApiTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["counts"]["predictions"], 1)
 
+    def test_model_performance_and_csv_export(self):
+        response = self.client.get("/api/model-performance/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["selected_model"], "linear_regression")
+        self.assertEqual(response.json()["metrics"][0]["model_name"], "linear_regression")
+        response = self.client.get("/api/export/daily.csv?location=test_city&start_date=2026-01-01&end_date=2026-01-03")
+        self.assertEqual(response.status_code, 200)
+        csv_body = b"".join(response.streaming_content).decode("utf-8")
+        self.assertIn("location,location_name,date", csv_body)
+        self.assertIn("test_city,Test City,2026-01-02", csv_body)
+

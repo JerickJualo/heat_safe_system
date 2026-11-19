@@ -1,11 +1,14 @@
-"""JSON endpoints for dashboard, analytics, comparisons, reports, and predictions."""
+"""JSON endpoints for dashboard, analytics, comparisons, reports, exports, and predictions."""
 
 from __future__ import annotations
 
+import csv
 from datetime import date
+from pathlib import Path
 
 from django.db import connection
-from django.http import JsonResponse
+from django.conf import settings
+from django.http import JsonResponse, StreamingHttpResponse
 from django.views.decorators.http import require_GET, require_POST
 
 from .models import DailyWeatherSummary, HeatIndexRecord, Location, ModelEvaluation, PredictionRecord, WeatherRecord
@@ -178,6 +181,27 @@ def report_data(request):
     return JsonResponse(
         {
             "database": {"vendor": connection.vendor, "configured": True},
+            "data_source": {
+                "provider": "Open-Meteo Historical Weather API",
+                "endpoint": "https://archive-api.open-meteo.com/v1/archive",
+                "weather_model": "ERA5",
+                "resolution": "Hourly",
+                "timezone": "Asia/Manila",
+                "coverage": "2017-01-01 through the latest non-null 2026 timestamp returned by the API",
+                "attribution": "Open-Meteo historical reanalysis data; see the Open-Meteo documentation and underlying ERA5 sources.",
+            },
+            "methodology": {
+                "heat_index": "National Weather Service Rothfusz regression with documented adjustments.",
+                "classification": "PAGASA heat-index categories.",
+                "prediction_target": "Next calendar day maximum daytime heat index.",
+                "daytime_window": "10:00 through 16:00 Asia/Manila, inclusive.",
+                "split": "Chronological train, validation, and test partitions.",
+            },
+            "limitations": [
+                "Open-Meteo ERA5 values are modeled reanalysis data, not direct station observations.",
+                "2026 is a partial year and remains subject to the source model update delay.",
+                "Predictions are decision-support estimates and should not replace official PAGASA advisories.",
+            ],
             "counts": {
                 "locations": Location.objects.filter(is_active=True).count(),
                 "weather_records": WeatherRecord.objects.count(),
@@ -197,6 +221,105 @@ def report_data(request):
             ],
         }
     )
+
+
+def _model_prediction_rows() -> list[dict]:
+    path = Path(settings.BASE_DIR) / "data" / "processed" / "ml" / "selected_model_test_predictions.csv"
+    if not path.exists():
+        return []
+    rows = []
+    with path.open("r", encoding="utf-8", newline="") as csv_file:
+        for row in csv.DictReader(csv_file):
+            try:
+                rows.append(
+                    {
+                        "target_date": row["target_date"],
+                        "location_name": row["location_name"],
+                        "actual": float(row["actual"]),
+                        "predicted": float(row["predicted"]),
+                        "absolute_error": float(row["absolute_error"]),
+                    }
+                )
+            except (KeyError, TypeError, ValueError):
+                continue
+    return rows
+
+
+@require_GET
+def model_performance_data(request):
+    evaluations = list(
+        ModelEvaluation.objects.values(
+            "model_name", "split", "row_count", "mae", "rmse", "r2"
+        )
+    )
+    predictions = _model_prediction_rows()
+    return JsonResponse(
+        {
+            "selected_model": "linear_regression",
+            "test_prediction_count": len(predictions),
+            "metrics": evaluations,
+            "predictions": predictions,
+            "visualization": {
+                "x": "actual",
+                "y": "predicted",
+                "unit": "degrees Celsius",
+                "source": "selected_model_test_predictions.csv",
+            },
+        }
+    )
+
+
+def _filtered_daily_summaries(request):
+    try:
+        start_date = _parse_date(request.GET.get("start_date"), "start_date")
+        end_date = _parse_date(request.GET.get("end_date"), "end_date")
+    except ValueError as exc:
+        raise ValueError(str(exc)) from exc
+    if start_date and end_date and start_date > end_date:
+        raise ValueError("start_date cannot be after end_date.")
+    location = _get_location(request.GET.get("location"))
+    if request.GET.get("location") and location is None:
+        raise LookupError("Unknown or inactive location.")
+    summaries = DailyWeatherSummary.objects.select_related("location").filter(daytime_complete=True)
+    if location:
+        summaries = summaries.filter(location=location)
+    if start_date:
+        summaries = summaries.filter(local_date__gte=start_date)
+    if end_date:
+        summaries = summaries.filter(local_date__lte=end_date)
+    return summaries.order_by("local_date", "location")
+
+
+class _Echo:
+    def write(self, value):
+        return value
+
+
+@require_GET
+def export_daily_csv(request):
+    try:
+        summaries = _filtered_daily_summaries(request)
+    except ValueError as exc:
+        return _error(str(exc))
+    except LookupError as exc:
+        return _error(str(exc), 404)
+    field_names = [
+        "location", "location_name", "date", "maximum_daytime_heat_index",
+        "maximum_hourly_heat_index", "average_heat_index", "daily_risk_category",
+        "maximum_temperature", "mean_relative_humidity", "total_precipitation",
+        "daytime_valid_hour_count", "daytime_expected_hour_count", "daytime_complete",
+        "data_quality_flag",
+    ]
+
+    def rows():
+        writer = csv.DictWriter(_Echo(), fieldnames=field_names)
+        yield writer.writeheader()
+        for summary in summaries.iterator(chunk_size=1000):
+            yield writer.writerow(_daily_payload(summary))
+
+    response = StreamingHttpResponse(rows(), content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = 'attachment; filename="heatsafe_daily_summaries.csv"'
+    return response
 
 
 @require_GET

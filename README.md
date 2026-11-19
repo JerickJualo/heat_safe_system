@@ -4,7 +4,7 @@ HeatSafe is a predictive heat-index monitoring and risk-analytics system for sel
 
 ## Current status
 
-Phase 6 is complete and awaiting approval. The project now contains the Phase 1 Django/PostgreSQL foundation, the Phase 2 programmatic ERA5 collection, Phase 3 preprocessing and exploratory analysis, Phase 4 next-day heat-index forecasting, the Phase 5 Django/PostgreSQL backend integration, and the Phase 6 database-connected frontend.
+Phase 7 is complete and awaiting approval. The project now contains the Phase 1 Django/PostgreSQL foundation, the Phase 2 programmatic ERA5 collection, Phase 3 preprocessing and exploratory analysis, Phase 4 next-day heat-index forecasting, the Phase 5 Django/PostgreSQL backend integration, the Phase 6 database-connected frontend, and Phase 7 model-performance and reporting features.
 
 ## Development setup
 
@@ -98,6 +98,8 @@ Available JSON endpoints:
 - `/api/predictions/generate/` — POST endpoint to regenerate and store current predictions.
 - `/api/locations/compare/?date=2026-11-13` — same-date location comparison.
 - `/api/report/` — database counts, model evaluations, and predictions.
+- `/api/model-performance/` — real candidate-model metrics and held-out actual-versus-predicted records.
+- `/api/export/daily.csv` — filtered CSV export of complete daily summaries using `location`, `start_date`, and `end_date` query parameters.
 
 ## Data attribution
 
@@ -121,3 +123,12 @@ Run the development server with:
 ```
 
 Then open `http://127.0.0.1:8000/`.
+
+## Model performance and reports
+
+Phase 7 adds two final pages:
+
+- `/performance/` — validation/test MAE, RMSE, and R² for the persistence baseline, Linear Regression, Random Forest, and HistGradientBoosting candidates, plus a native SVG actual-versus-predicted view using the 1,620-row held-out test artifact.
+- `/reports/` — PostgreSQL record counts, data-source attribution, methodology, limitations, and filtered daily CSV export controls.
+
+The selected model remains Linear Regression. Its held-out test results are MAE 1.2497°C, RMSE 1.6527°C, and R² 0.6045, read from the imported evaluation records. PDF export was intentionally not added because the project has no verified PDF-generation dependency; CSV export is implemented and tested.

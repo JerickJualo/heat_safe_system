@@ -2,7 +2,7 @@
 
 ## Current phase
 
-Phase 6 — Website Frontend Development (complete; awaiting approval before Phase 7)
+Phase 7 — Model Performance, Reports, and Final Website Features (complete; awaiting approval)
 
 ## Phase 1 completed
 
@@ -21,7 +21,7 @@ Phase 6 — Website Frontend Development (complete; awaiting approval before Pha
 
 ## Pending
 
-- Phase 7 work, pending approval of the completed Phase 6 frontend.
+- No further phase work is started; awaiting approval of Phase 7.
 
 ## Verification log
 
@@ -156,6 +156,28 @@ Phase 6 - Website Frontend Development (complete; awaiting approval before Phase
 - Actual prediction request for `butuan_city` returned its stored model output for target date `2026-11-14`.
 - Native SVG chart assets and the frontend JavaScript loaded with HTTP 200.
 - Automated computer-use visual inspection was attempted but the Windows UI helper timed out twice; route/API verification completed successfully, but no visual screenshot claim is made.
+
+## Phase 7 model performance and reports update
+
+Phase 7 - Model Performance, Reports, and Final Website Features (complete; awaiting approval)
+
+- Added `/performance/` with real PostgreSQL model-evaluation metrics and actual-versus-predicted visualization data sourced from the held-out test artifact.
+- Added `/reports/` with real database counts, Open-Meteo/ERA5 attribution, methodology, limitations, and CSV export controls.
+- Added `/api/model-performance/` and `/api/export/daily.csv`.
+- Added filtered daily-summary CSV export with location and date validation.
+- Added six-page navigation and frontend route coverage.
+- PDF export was not added because no existing PDF dependency was available with a reliable verification path; CSV export is the supported report export.
+
+## Phase 7 verification log
+
+- `.venv\Scripts\python.exe manage.py check` — no issues detected.
+- `node --check static\js\app.js` — passed.
+- `.venv\Scripts\python.exe manage.py test apps.core apps.weather -v 2 --keepdb` — 7 tests passed.
+- Fresh development server returned HTTP 200 for `/`, `/analytics/`, `/prediction/`, `/comparison/`, `/performance/`, and `/reports/`.
+- `/api/model-performance/` returned the actual selected model `linear_regression`, six evaluation records, and 1,620 held-out prediction rows.
+- The selected test metrics matched the Phase 4 artifact: MAE 1.2497°C, RMSE 1.6527°C, and R² 0.6045.
+- `/api/report/` returned PostgreSQL-backed counts: 3 locations, 259,920 weather records, 259,512 heat-index records, 10,830 daily summaries, and 3 stored predictions.
+- Filtered CSV export for Davao City, 2025-01-01 through 2025-01-02 returned a header plus the two expected daily records.
 
 ## Phase 4 verification log
 

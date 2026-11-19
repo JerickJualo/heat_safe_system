@@ -124,6 +124,25 @@
         container.innerHTML = `<svg viewBox="0 0 ${width} ${Math.max(height, top + valid.length * (barHeight + gap))}" role="img" aria-label="Risk classification bar chart">${bars}</svg>`;
     }
 
+    function renderScatterChart(container, points) {
+        if (!container || !points.length) { if (container) container.innerHTML = '<div class="empty-state">No held-out prediction records are available.</div>'; return; }
+        const width = 600, height = 300, left = 48, right = 18, top = 18, bottom = 34;
+        const values = points.flatMap(point => [Number(point.actual), Number(point.predicted)]).filter(Number.isFinite);
+        const rawMin = Math.min(...values), rawMax = Math.max(...values), spread = Math.max(rawMax - rawMin, 2);
+        const min = Math.floor(rawMin - spread * .08), max = Math.ceil(rawMax + spread * .08);
+        const plotWidth = width - left - right, plotHeight = height - top - bottom;
+        const scaleX = value => left + ((value - min) / (max - min)) * plotWidth;
+        const scaleY = value => top + ((max - value) / (max - min)) * plotHeight;
+        const grid = [0, .25, .5, .75, 1].map(fraction => {
+            const value = min + (max - min) * (1 - fraction), yPosition = top + plotHeight * fraction;
+            const xPosition = left + plotWidth * fraction;
+            return `<line class="chart-grid-line" x1="${left}" x2="${width - right}" y1="${yPosition}" y2="${yPosition}"></line><line class="chart-grid-line" x1="${xPosition}" x2="${xPosition}" y1="${top}" y2="${height - bottom}"></line><text class="chart-axis-label" x="4" y="${yPosition + 4}">${value.toFixed(0)}°</text>`;
+        }).join("");
+        const diagonal = `<line x1="${scaleX(min)}" y1="${scaleY(min)}" x2="${scaleX(max)}" y2="${scaleY(max)}" stroke="#8fa7b9" stroke-dasharray="5 5" opacity=".7"></line>`;
+        const dots = points.map(point => `<circle cx="${scaleX(Number(point.actual)).toFixed(1)}" cy="${scaleY(Number(point.predicted)).toFixed(1)}" r="2.3" fill="#f97316" opacity=".42"></circle>`).join("");
+        container.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Actual versus predicted scatter chart">${grid}${diagonal}${dots}<text class="chart-axis-label" x="${width / 2 - 28}" y="${height - 5}">Actual °C</text><text class="chart-axis-label" transform="translate(12 ${height / 2 + 28}) rotate(-90)">Predicted °C</text></svg>`;
+    }
+
     function locationSeries(records, selectedSlug = "") {
         const groups = groupBy(selectedSlug ? records.filter(record => record.location === selectedSlug) : records, "location");
         return Object.entries(groups).sort((a, b) => a[0].localeCompare(b[0])).map(([slug, items], index) => ({
@@ -242,6 +261,55 @@
         await load();
     }
 
+    async function initPerformance() {
+        const loading = $("#performance-loading"), error = $("#performance-error");
+        setLoading(loading, true);
+        try {
+            const payload = await fetchJson("/model-performance/");
+            const metrics = payload.metrics || [];
+            const selected = payload.selected_model || "—";
+            const testMetric = metrics.find(metric => metric.model_name === selected && metric.split === "test_refit_train_validation");
+            $("#performance-selected-model").textContent = selected.replaceAll("_", " ");
+            $("#performance-test-mae").textContent = testMetric ? formatHeat(testMetric.mae) : "—";
+            $("#performance-test-rmse").textContent = testMetric ? formatHeat(testMetric.rmse) : "—";
+            $("#performance-test-r2").textContent = testMetric ? Number(testMetric.r2).toFixed(3) : "—";
+            $("#performance-prediction-count").textContent = `${formatNumber(payload.test_prediction_count)} held-out rows`;
+            $("#performance-metrics-table").innerHTML = metrics.map(metric => `<tr><td>${escapeHtml(metric.model_name.replaceAll("_", " "))}</td><td>${escapeHtml(metric.split)}</td><td>${formatNumber(metric.row_count)}</td><td>${formatHeat(metric.mae)}</td><td>${formatHeat(metric.rmse)}</td><td>${Number(metric.r2).toFixed(3)}</td></tr>`).join("") || '<tr><td colspan="6">No model evaluation records are available.</td></tr>';
+            const points = (payload.predictions || []).filter(point => Number.isFinite(Number(point.actual)) && Number.isFinite(Number(point.predicted)));
+            renderScatterChart($("#performance-scatter-chart"), points);
+        } catch (requestError) { showError(error, requestError.message); }
+        finally { setLoading(loading, false); }
+    }
+
+    function updateExportLink() {
+        const params = new URLSearchParams();
+        if ($("#report-location").value) params.set("location", $("#report-location").value);
+        if ($("#report-start").value) params.set("start_date", $("#report-start").value);
+        if ($("#report-end").value) params.set("end_date", $("#report-end").value);
+        const query = params.toString();
+        $("#report-csv-link").href = `/api/export/daily.csv${query ? `?${query}` : ""}`;
+    }
+
+    async function initReports() {
+        const loading = $("#reports-loading"), error = $("#reports-error"), locationSelect = $("#report-location");
+        setLoading(loading, true);
+        try {
+            const [report, dashboard] = await Promise.all([fetchJson("/report/"), fetchJson("/dashboard/")]);
+            setOptions(locationSelect, dashboard.locations || [], true);
+            const counts = report.counts || {};
+            const countLabels = [["locations", "Active locations"], ["weather_records", "Hourly weather records"], ["heat_index_records", "Heat-index records"], ["daily_summaries", "Daily summaries"], ["predictions", "Stored predictions"]];
+            $("#report-counts").innerHTML = countLabels.map(([key, label]) => `<article class="metric-card"><span class="metric-label">${label}</span><strong>${formatNumber(counts[key])}</strong><span class="metric-caption">PostgreSQL record count</span></article>`).join("");
+            const source = report.data_source || {};
+            $("#report-source-details").innerHTML = Object.entries(source).map(([key, value]) => `<dt>${escapeHtml(key.replaceAll("_", " "))}</dt><dd>${escapeHtml(value)}</dd>`).join("");
+            const methodology = report.methodology || {};
+            $("#report-methodology").innerHTML = Object.entries(methodology).map(([key, value]) => `<dt>${escapeHtml(key.replaceAll("_", " "))}</dt><dd>${escapeHtml(value)}</dd>`).join("");
+            $("#report-limitations").innerHTML = (report.limitations || []).map(item => `<li>${escapeHtml(item)}</li>`).join("");
+            [locationSelect, $("#report-start"), $("#report-end")].forEach(element => element.addEventListener("change", updateExportLink));
+            updateExportLink();
+        } catch (requestError) { showError(error, requestError.message); }
+        finally { setLoading(loading, false); }
+    }
+
     function initShell() {
         const currentDate = $("#current-date");
         if (currentDate) currentDate.textContent = new Intl.DateTimeFormat("en-PH", { dateStyle: "medium", timeZone: "Asia/Manila" }).format(new Date());
@@ -257,5 +325,7 @@
         if (page === "analytics") initAnalytics();
         if (page === "prediction") initPrediction();
         if (page === "comparison") initComparison();
+        if (page === "performance") initPerformance();
+        if (page === "reports") initReports();
     });
 })();

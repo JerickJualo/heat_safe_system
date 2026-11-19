@@ -10,4 +10,6 @@ urlpatterns = [
     path("analytics/", views.analytics_page, name="analytics"),
     path("prediction/", views.prediction_page, name="prediction"),
     path("comparison/", views.comparison_page, name="comparison"),
+    path("performance/", views.performance_page, name="performance"),
+    path("reports/", views.reports_page, name="reports"),
 ]

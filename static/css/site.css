@@ -116,6 +116,20 @@ tbody tr:hover { background: rgba(56, 189, 248, .04); }
 .prediction-value span, .prediction-value small { display: block; color: var(--muted); font-size: .7rem; }
 .prediction-value strong { display: block; margin: .3rem 0; color: #fed7aa; font-size: clamp(2rem, 4vw, 3.3rem); letter-spacing: -.05em; }
 .prediction-value small { color: var(--muted-strong); }
+.metric-value-text { font-size: 1.2rem !important; line-height: 1.2; text-transform: capitalize; }
+.chart-note, .panel-copy { color: var(--muted); font-size: .75rem; line-height: 1.55; }
+.chart-note { margin: .8rem 0 0; }
+.report-actions { display: flex; align-items: center; justify-content: space-between; gap: 2rem; margin-bottom: 1rem; }
+.report-actions h2 { margin-bottom: .45rem; }
+.report-actions .panel-copy { margin-bottom: 0; }
+.export-controls { display: flex; align-items: flex-end; flex-wrap: wrap; justify-content: flex-end; gap: .65rem; }
+.export-controls .field-label { min-width: 9rem; }
+.export-controls .button { display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; }
+.detail-list { display: grid; grid-template-columns: minmax(7rem, .7fr) 1.3fr; gap: .7rem 1rem; margin: 0; font-size: .76rem; }
+.detail-list dt { color: var(--muted); font-weight: 800; }
+.detail-list dd { margin: 0; color: var(--muted-strong); line-height: 1.45; }
+.limitations-list { display: grid; gap: .75rem; margin: 0; padding-left: 1.1rem; color: var(--muted-strong); font-size: .78rem; line-height: 1.55; }
+.limitations-list li::marker { color: var(--orange); }
 .site-footer { padding: 0 3.1rem 2rem; color: #607a8b; font-size: .68rem; }
 .toast { position: fixed; z-index: 30; right: 1rem; bottom: 1rem; max-width: 28rem; padding: .9rem 1rem; border-radius: .7rem; box-shadow: 0 1rem 3rem rgba(0,0,0,.3); }
 .toast-error { border: 1px solid rgba(239, 68, 68, .45); background: #35131b; color: #fecaca; }
@@ -124,7 +138,7 @@ tbody tr:hover { background: rgba(56, 189, 248, .04); }
     .topbar { padding: 0 2.2rem; }
     .site-footer { padding: 0 2.2rem 1.5rem; }
     .metric-grid-four { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .dashboard-grid, .analytics-grid, .comparison-grid { grid-template-columns: 1fr; }
+    .dashboard-grid, .analytics-grid, .comparison-grid, .performance-grid, .reports-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 760px) {
     .sidebar { transform: translateX(-100%); transition: transform .2s ease; box-shadow: 1rem 0 3rem rgba(0,0,0,.3); }
@@ -145,6 +159,10 @@ tbody tr:hover { background: rgba(56, 189, 248, .04); }
     .metric-grid, .metric-grid-four { grid-template-columns: 1fr; }
     .metric-card { min-height: auto; }
     .prediction-value { min-width: 0; text-align: left; }
+    .report-actions { align-items: stretch; flex-direction: column; gap: 1rem; }
+    .export-controls { align-items: stretch; flex-direction: column; }
+    .export-controls .field-label { min-width: 0; }
+    .export-controls .button { min-height: 2.7rem; }
     .panel { padding: 1rem; }
     .panel-heading { align-items: flex-start; flex-direction: column; gap: .5rem; }
     .panel-meta { white-space: normal; }
