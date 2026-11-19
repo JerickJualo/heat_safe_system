@@ -2,7 +2,7 @@
 
 ## Current phase
 
-Phase 4 — Predictive Machine Learning Development (complete; awaiting approval before Phase 5)
+Phase 5 — Django Backend and PostgreSQL Integration (complete; awaiting approval before Phase 6)
 
 ## Phase 1 completed
 
@@ -105,7 +105,31 @@ Phase 4 - Predictive Machine Learning Development (complete; awaiting approval b
 - Held-out test performance after refitting on training plus validation: MAE 1.2497 deg C, RMSE 1.6527 deg C, R2 0.6045.
 - Saved the Joblib model bundle, metadata, model comparison report, test predictions, and evaluation charts.
 - Verified saved-model loading and inference on actual recent valid history for Surigao City, Butuan City, and Davao City.
-- Phase 5 was not started.
+- Phase 5 had not started at the time of the Phase 4 verification.
+
+## Phase 5 Django backend and PostgreSQL update
+
+Phase 5 - Django Backend and PostgreSQL Integration (complete; awaiting approval before Phase 6)
+
+- Added the `apps.weather` Django application and PostgreSQL-backed models for locations, hourly weather, heat-index records, daily summaries, predictions, and model evaluations.
+- Applied migration `apps.weather.0001_initial` successfully.
+- Added an idempotent `import_heatsafe_data` management command with chunked bulk imports and unique constraints.
+- Imported actual records into PostgreSQL: 3 locations, 259,920 hourly weather records, 259,512 heat-index records, 10,830 daily summaries, 6 model evaluation records, and 3 prediction records.
+- Connected Django prediction services to the saved Phase 4 Joblib model and stored current predictions for all three locations.
+- Added dashboard, analytics, prediction, prediction-generation, location-comparison, report, and health endpoints under `/api/`.
+- Added admin registrations for all backend models.
+
+## Phase 5 verification log
+
+- `.venv\Scripts\python.exe manage.py check` — no issues detected.
+- `.venv\Scripts\python.exe manage.py makemigrations --check --dry-run` — no changes detected.
+- `.venv\Scripts\python.exe manage.py migrate --check` — no unapplied migrations.
+- `.venv\Scripts\python.exe manage.py test apps.weather -v 1` — 5 tests passed against a temporary PostgreSQL test database.
+- Idempotent import rerun — record counts remained unchanged.
+- Duplicate checks — zero duplicate weather, daily-summary, and prediction key groups.
+- Health endpoint returned HTTP 200 with database status true.
+- API endpoint tests passed for dashboard, analytics validation, predictions, location comparison, and report retrieval.
+- Phase 6 was not started.
 
 ## Phase 4 verification log
 

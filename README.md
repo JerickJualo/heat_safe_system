@@ -4,7 +4,7 @@ HeatSafe is a predictive heat-index monitoring and risk-analytics system for sel
 
 ## Current status
 
-Phase 4 is complete and awaiting approval. The project now contains the Phase 1 Django/PostgreSQL foundation, the Phase 2 programmatic ERA5 collection, Phase 3 preprocessing and exploratory analysis, and Phase 4 next-day heat-index forecasting. Dashboard features have not started.
+Phase 5 is complete and awaiting approval. The project now contains the Phase 1 Django/PostgreSQL foundation, the Phase 2 programmatic ERA5 collection, Phase 3 preprocessing and exploratory analysis, Phase 4 next-day heat-index forecasting, and the Phase 5 Django/PostgreSQL backend integration.
 
 ## Development setup
 
@@ -77,6 +77,27 @@ The pipeline creates a leakage-aware supervised dataset from complete daily reco
 The persistence baseline and Linear Regression, Random Forest Regressor, and HistGradientBoosting Regressor are evaluated with MAE, RMSE, and R². The model with the lowest validation MAE is refit on training plus validation data and evaluated once on the held-out test period.
 
 Phase 4 outputs are written to `data/processed/ml/` and `models/phase4/`, including the engineered ML dataset, model comparison CSV, test predictions, metadata JSON, evaluation charts, and the Joblib model bundle. The reusable inference function is `predict_next_day_maximum_daytime_heat_index` in `data_pipeline/ml/inference.py`.
+
+## Django backend and database import
+
+Run the Phase 5 database import from the project root after PostgreSQL is configured in `.env`:
+
+```powershell
+.\.venv\Scripts\python.exe manage.py migrate
+.\.venv\Scripts\python.exe manage.py import_heatsafe_data
+```
+
+The import is idempotent. Unique constraints prevent duplicate weather timestamps, daily summaries, and predictions. It imports the actual processed datasets, calculated heat-index rows, model evaluation rows, and latest model predictions into PostgreSQL. A summary is written to `data/processed/ml/django_import_summary.json`.
+
+Available JSON endpoints:
+
+- `/api/health/` — database health check.
+- `/api/dashboard/` — active locations, latest daily summaries, and latest predictions.
+- `/api/analytics/?location=surigao_city&start_date=2025-01-01&end_date=2025-12-31` — complete daily analytics records.
+- `/api/predictions/?location=surigao_city` — stored predictions.
+- `/api/predictions/generate/` — POST endpoint to regenerate and store current predictions.
+- `/api/locations/compare/?date=2026-11-13` — same-date location comparison.
+- `/api/report/` — database counts, model evaluations, and predictions.
 
 ## Data attribution
 
