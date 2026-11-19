@@ -312,6 +312,7 @@ def generate_multi_day_forecast(location: Location, feature_date, horizon_days: 
     return forecasts
 
 
+@transaction.atomic
 def import_all() -> dict:
     locations = ensure_locations()
     weather_counts = import_weather_records(locations)

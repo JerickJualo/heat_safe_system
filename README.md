@@ -114,6 +114,24 @@ Run the Phase 5 database import from the project root after PostgreSQL is config
 
 The import is idempotent. Unique constraints prevent duplicate weather timestamps, daily summaries, and predictions. It imports the actual processed datasets, calculated heat-index rows, model evaluation rows, and latest model predictions into PostgreSQL. A summary is written to `data/processed/ml/django_import_summary.json`.
 
+## Automatic dataset and model updates
+
+The website does not collect data or retrain models during startup or user requests. For Windows, the repository includes a scheduled-update runner that performs collection, preprocessing, both model-training jobs, migrations, and database import as one logged job. It prevents overlapping runs and restores the previous model artifacts if a later step fails.
+
+Register the default daily 03:00 local-time task from an elevated or permitted PowerShell session:
+
+```powershell
+.\scripts\register_heatsafe_task.ps1
+```
+
+The task runs under the current Windows user and writes logs to `logs/`. To remove it:
+
+```powershell
+.\scripts\unregister_heatsafe_task.ps1
+```
+
+Use Task Scheduler to run the task manually once before relying on the schedule. Confirm the log, database counts, latest source timestamp, and model metadata after the first successful run.
+
 Available JSON endpoints:
 
 - `/api/health/` — database health check.

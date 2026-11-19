@@ -75,6 +75,26 @@ Before deployment:
 
 `runserver` is for development and demonstrations only. A production deployment should use a hardened WSGI/ASGI server behind an HTTPS reverse proxy, with PostgreSQL backups and restricted database credentials. A production server is not bundled in this repository.
 
+## Automatic Windows updates
+
+The repository includes `scripts/run_scheduled_update.py`, which runs collection, preprocessing, next-day training, one-to-five-day training, migrations, and database import. It writes daily logs under `logs/`, prevents overlapping runs, and restores previous model artifacts if an update step fails.
+
+Register the default daily 03:00 local-time Task Scheduler job:
+
+```powershell
+.\scripts\register_heatsafe_task.ps1
+```
+
+The task runs under the current Windows user. Windows may require permission to register the task. The machine must be awake or configured to start missed tasks when available, and PostgreSQL must be running. Verify the first run manually in Task Scheduler and inspect the generated log.
+
+Remove the task with:
+
+```powershell
+.\scripts\unregister_heatsafe_task.ps1
+```
+
+The scheduled job is intentionally separate from Django web requests. Users continue to receive the last successful model and database state while an update is running.
+
 ## Updating datasets
 
 When new source data is needed, rerun collection, preprocessing, and EDA. Retrain the model only if the dataset or modeling code changed. Then rerun the idempotent import command. Verify counts, date coverage, model metadata, and API health after the update.

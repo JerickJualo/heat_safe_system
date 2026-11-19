@@ -12,6 +12,7 @@ models/*.pkl
 models/**/*.joblib
 models/**/*.pkl
 *.log
+.heatsafe_update.lock
 .pytest_cache/
 .mypy_cache/
 .coverage

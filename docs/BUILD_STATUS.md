@@ -236,3 +236,11 @@ Phase 8 - Testing, Security, Optimization, and Bug Fixes (complete; awaiting app
 - Updated the Prediction page with location and feature-date controls and a five-day forecast table.
 - Verified the real Surigao City feature date `2026-11-13` returns five numerical predictions for `2026-11-14` through `2026-11-18`.
 - Five-day direct-model held-out test MAE increases from 1.2497°C at horizon 1 to 1.5380°C at horizon 5; this expected degradation is documented for transparent interpretation.
+
+## Automatic update enhancement
+
+- Added `scripts/run_scheduled_update.py` for collection, preprocessing, model retraining, migrations, and database import.
+- Added single-instance locking, daily log files, and model-artifact rollback on failed updates.
+- Added Windows Task Scheduler registration and removal scripts.
+- Registered `HeatSafe-Daily-Data-Update` under the current Windows user for daily execution at 03:00 local time. The task is currently `Ready`; its first scheduled run is the next 03:00 occurrence.
+- Made the database import operation atomic so a failed import does not leave a partial refresh.
