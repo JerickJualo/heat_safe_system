@@ -4,10 +4,12 @@ import pandas as pd
 
 from data_pipeline.ml.features import (
     FEATURE_COLUMNS,
+    MULTI_HORIZON_TARGET_COLUMN,
     TARGET_COLUMN,
     assert_no_target_leakage,
     build_feature_frame,
     build_ml_dataset,
+    build_multi_horizon_dataset,
     split_by_target_date,
 )
 
@@ -66,6 +68,17 @@ class MachineLearningFeatureTests(unittest.TestCase):
         self.assertLess(train["target_date"].max(), validation["target_date"].min())
         self.assertLess(validation["target_date"].max(), test["target_date"].min())
         self.assertEqual(metadata["train"]["rows"] + metadata["validation"]["rows"] + metadata["test"]["rows"], len(dataset))
+
+    def test_multi_horizon_target_uses_exact_future_date(self):
+        dataset = build_multi_horizon_dataset(make_daily_frame(days=20, locations=1), 5)
+        row = dataset[dataset["feature_date"] == pd.Timestamp("2020-01-08")].iloc[0]
+        self.assertEqual(row["target_date"], pd.Timestamp("2020-01-13"))
+        self.assertAlmostEqual(row[MULTI_HORIZON_TARGET_COLUMN], 42.0)
+        self.assertEqual(row["forecast_horizon_days"], 5)
+
+    def test_multi_horizon_rejects_horizons_outside_one_to_five(self):
+        with self.assertRaises(ValueError):
+            build_multi_horizon_dataset(make_daily_frame(), 6)
 
 
 if __name__ == "__main__":

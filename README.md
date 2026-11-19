@@ -95,6 +95,14 @@ The persistence baseline and Linear Regression, Random Forest Regressor, and His
 
 Phase 4 outputs are written to `data/processed/ml/` and `models/phase4/`, including the engineered ML dataset, model comparison CSV, test predictions, metadata JSON, evaluation charts, and the Joblib model bundle. The reusable inference function is `predict_next_day_maximum_daytime_heat_index` in `data_pipeline/ml/inference.py`.
 
+The prediction page also supports a bounded five-day forecast. Run the direct multi-horizon training command after refreshing the daily dataset:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\train_multi_horizon_model.py
+```
+
+This creates separate direct models for horizons 1 through 5 in `models/phase4/heat_index_multi_horizon_model.joblib`. Each model uses only information available on the selected feature date and does not fabricate future weather observations. On the website, select a complete feature date and click **Generate five-day forecast** to view the following five target dates.
+
 ## Django backend and database import
 
 Run the Phase 5 database import from the project root after PostgreSQL is configured in `.env`:
@@ -112,6 +120,7 @@ Available JSON endpoints:
 - `/api/dashboard/` — active locations, latest daily summaries, and latest predictions.
 - `/api/analytics/?location=surigao_city&start_date=2025-01-01&end_date=2025-12-31` — complete daily analytics records.
 - `/api/predictions/?location=surigao_city` — stored predictions.
+- `/api/predictions/forecast/?location=surigao_city&feature_date=2026-11-13&horizon=5` — direct forecast records for horizons 1 through 5 from a selected complete feature date.
 - `/api/predictions/generate/` — POST endpoint to regenerate and store current predictions.
 - `/api/locations/compare/?date=2026-11-13` — same-date location comparison.
 - `/api/report/` — database counts, model evaluations, and predictions.

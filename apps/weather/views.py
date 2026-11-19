@@ -12,7 +12,7 @@ from django.http import JsonResponse, StreamingHttpResponse
 from django.views.decorators.http import require_GET, require_POST
 
 from .models import DailyWeatherSummary, HeatIndexRecord, Location, ModelEvaluation, PredictionRecord, WeatherRecord
-from .services import ensure_locations, generate_and_store_predictions
+from .services import ensure_locations, generate_and_store_predictions, generate_multi_day_forecast
 
 
 def _error(message: str, status: int = 400) -> JsonResponse:
@@ -142,6 +142,39 @@ def prediction_data(request):
     return JsonResponse({"count": len(records), "records": records})
 
 
+@require_GET
+def multi_day_prediction_data(request):
+    location = _get_location(request.GET.get("location"))
+    if location is None:
+        return _error("A valid active location is required.", 404)
+    try:
+        feature_date = _parse_date(request.GET.get("feature_date"), "feature_date")
+        if feature_date is None:
+            raise ValueError("feature_date is required and must use YYYY-MM-DD format.")
+        horizon_days = int(request.GET.get("horizon", "5"))
+        if not 1 <= horizon_days <= 5:
+            raise ValueError("horizon must be an integer from 1 through 5.")
+    except ValueError as exc:
+        return _error(str(exc))
+    try:
+        forecasts = generate_multi_day_forecast(location, feature_date, horizon_days)
+    except FileNotFoundError as exc:
+        return _error(str(exc), 503)
+    except ValueError as exc:
+        return _error(str(exc))
+    except Exception as exc:
+        return _error(f"Forecast generation failed: {exc}", 500)
+    return JsonResponse(
+        {
+            "location": location.slug,
+            "location_name": location.name,
+            "feature_date": feature_date.isoformat(),
+            "horizon_days": horizon_days,
+            "records": forecasts,
+        }
+    )
+
+
 @require_POST
 def generate_predictions(request):
     try:
@@ -194,7 +227,7 @@ def report_data(request):
             "methodology": {
                 "heat_index": "National Weather Service Rothfusz regression with documented adjustments.",
                 "classification": "PAGASA heat-index categories.",
-                "prediction_target": "Next calendar day maximum daytime heat index.",
+                "prediction_target": "Stored next-day maximum daytime heat index plus direct forecast horizons 1 through 5 days.",
                 "daytime_window": "10:00 through 16:00 Asia/Manila, inclusive.",
                 "split": "Chronological train, validation, and test partitions.",
             },

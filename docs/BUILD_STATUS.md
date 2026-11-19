@@ -227,3 +227,12 @@ Phase 8 - Testing, Security, Optimization, and Bug Fixes (complete; awaiting app
 - Added `docs/DEMONSTRATION_CHECKLIST.md` with a concise academic presentation walkthrough and recovery notes.
 - Added `docs/FINAL_SUMMARY.md` with the project purpose, completed capabilities, model result, reproducibility notes, and limitations.
 - The documented setup and execution entry points were checked against the working `.venv`, Django project, PostgreSQL database, data artifacts, model artifact, and current test suite. The full remote collection and model retraining sequence was not rerun during documentation work because it would overwrite the already verified generated artifacts; the exact commands remain documented for a deliberate refresh.
+
+## Post-Phase 9 prediction enhancement
+
+- Added direct multi-horizon model training for horizons 1 through 5 with `scripts/train_multi_horizon_model.py`.
+- Saved `models/phase4/heat_index_multi_horizon_model.joblib` and `data/processed/ml/multi_horizon_model_metadata.json`.
+- Added `/api/predictions/forecast/` with bounded horizon validation and complete-feature-date validation.
+- Updated the Prediction page with location and feature-date controls and a five-day forecast table.
+- Verified the real Surigao City feature date `2026-11-13` returns five numerical predictions for `2026-11-14` through `2026-11-18`.
+- Five-day direct-model held-out test MAE increases from 1.2497°C at horizon 1 to 1.5380°C at horizon 5; this expected degradation is documented for transparent interpretation.

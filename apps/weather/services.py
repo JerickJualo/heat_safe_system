@@ -12,7 +12,13 @@ import pandas as pd
 from django.db import transaction
 from django.utils import timezone
 
-from data_pipeline.ml.inference import predict_with_model_bundle, prepare_next_day_features
+from data_pipeline.ml.inference import (
+    load_multi_horizon_bundle,
+    predict_multi_horizon_with_bundle,
+    predict_with_model_bundle,
+    prepare_next_day_features,
+)
+from data_pipeline.preprocessing.heat_index import classify_heat_index
 
 from .models import DailyWeatherSummary, HeatIndexRecord, Location, ModelEvaluation, PredictionRecord, WeatherRecord
 
@@ -22,6 +28,7 @@ RAW_DIR = PROJECT_ROOT / "data" / "raw"
 PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"
 ML_DIR = PROCESSED_DIR / "ml"
 MODEL_PATH = PROJECT_ROOT / "models" / "phase4" / "heat_index_next_day_model.joblib"
+MULTI_HORIZON_MODEL_PATH = PROJECT_ROOT / "models" / "phase4" / "heat_index_multi_horizon_model.joblib"
 LOCAL_TZ = ZoneInfo("Asia/Manila")
 IMPORT_CHUNK_SIZE = 2_000
 
@@ -277,6 +284,32 @@ def generate_and_store_predictions(locations: dict[str, Location]) -> int:
         )
         stored += 1
     return stored
+
+
+def generate_multi_day_forecast(location: Location, feature_date, horizon_days: int = 5) -> list[dict]:
+    """Generate a bounded direct forecast from one selected complete feature date."""
+    if not 1 <= horizon_days <= 5:
+        raise ValueError("horizon_days must be between 1 and 5.")
+    if not MULTI_HORIZON_MODEL_PATH.exists():
+        raise FileNotFoundError(
+            "The five-day model artifact is not available. Run scripts/train_multi_horizon_model.py first."
+        )
+    daily_path = PROCESSED_DIR / "daily_heat_index.csv"
+    if not daily_path.exists():
+        raise FileNotFoundError(daily_path)
+    daily = pd.read_csv(daily_path)
+    history = daily[daily["location_slug"] == location.slug].copy()
+    if history.empty:
+        raise ValueError(f"No processed daily history is available for {location.name}.")
+    selected_date = pd.Timestamp(feature_date).date()
+    history = history[pd.to_datetime(history["local_date"], errors="coerce").dt.date <= selected_date]
+    bundle = load_multi_horizon_bundle(MULTI_HORIZON_MODEL_PATH)
+    forecasts = predict_multi_horizon_with_bundle(bundle, history, selected_date, horizon_days)
+    for forecast in forecasts:
+        forecast["location"] = location.slug
+        forecast["location_name"] = location.name
+        forecast["risk_category"] = classify_heat_index(forecast["predicted_heat_index_celsius"])
+    return forecasts
 
 
 def import_all() -> dict:

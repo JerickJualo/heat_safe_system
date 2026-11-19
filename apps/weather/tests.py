@@ -105,3 +105,13 @@ class WeatherApiTests(TestCase):
         response = csrf_client.post("/api/predictions/generate/")
         self.assertEqual(response.status_code, 403)
 
+    def test_multi_day_prediction_validation(self):
+        response = self.client.get(
+            "/api/predictions/forecast/?location=test_city&feature_date=2026-01-02&horizon=6"
+        )
+        self.assertEqual(response.status_code, 400)
+        response = self.client.get(
+            "/api/predictions/forecast/?location=test_city&feature_date=not-a-date"
+        )
+        self.assertEqual(response.status_code, 400)
+

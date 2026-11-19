@@ -1,6 +1,6 @@
 # Machine-Learning Methodology
 
-## Objective
+## Next-day objective
 
 Predict the next calendar day's maximum daytime heat index in degrees Celsius for each location.
 
@@ -38,6 +38,18 @@ Linear Regression was selected. The verified held-out test results were:
 | R² | 0.6045 |
 
 The saved artifact is `models/phase4/heat_index_next_day_model.joblib`. Running the Django application or generating predictions does not retrain the model. Retraining occurs only when `scripts/train_heat_index_model.py` is explicitly executed.
+
+## Five-day direct forecast extension
+
+The prediction page supports horizons 1 through 5 using direct models saved in `models/phase4/heat_index_multi_horizon_model.joblib`. One Linear Regression model is trained separately for each horizon. The target for horizon `h` is the maximum daytime heat index exactly `h` calendar days after the selected feature date.
+
+The five-day models use the same leakage-aware current-day, lag, rolling, seasonal, and location features. They do not recursively insert predicted values as if they were observations, and they do not require future weather inputs. The extension is trained with:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\train_multi_horizon_model.py
+```
+
+The direct-model validation and held-out test metrics are stored in `data/processed/ml/multi_horizon_model_metadata.json`. Expected error generally increases with forecast horizon, so the five-day estimates should be interpreted as broader decision-support guidance rather than precise official forecasts.
 
 ## Interpretation limits
 

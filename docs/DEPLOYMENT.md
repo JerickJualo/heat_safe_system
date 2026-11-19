@@ -46,6 +46,7 @@ The raw and processed datasets are generated artifacts and may be excluded from 
 .\.venv\Scripts\python.exe -m data_pipeline.preprocessing.run_preprocessing
 .\.venv\Scripts\python.exe -m data_pipeline.analysis.run_eda
 .\.venv\Scripts\python.exe scripts\train_heat_index_model.py
+.\.venv\Scripts\python.exe scripts\train_multi_horizon_model.py
 .\.venv\Scripts\python.exe manage.py migrate
 .\.venv\Scripts\python.exe manage.py import_heatsafe_data
 ```

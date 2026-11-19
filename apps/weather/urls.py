@@ -10,6 +10,7 @@ urlpatterns = [
     path("dashboard/", views.dashboard_data, name="dashboard"),
     path("analytics/", views.analytics_data, name="analytics"),
     path("predictions/", views.prediction_data, name="predictions"),
+    path("predictions/forecast/", views.multi_day_prediction_data, name="prediction_forecast"),
     path("predictions/generate/", views.generate_predictions, name="generate_predictions"),
     path("locations/compare/", views.location_comparison, name="location_comparison"),
     path("report/", views.report_data, name="report"),

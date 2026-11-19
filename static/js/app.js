@@ -217,25 +217,59 @@
     }
 
     async function initPrediction() {
-        const loading = $("#prediction-loading"), error = $("#prediction-error"), select = $("#prediction-location"), card = $("#prediction-card");
+        const loading = $("#prediction-loading"), error = $("#prediction-error"), select = $("#prediction-location");
+        const dateInput = $("#prediction-feature-date"), apply = $("#prediction-apply"), card = $("#prediction-card");
+        const forecastPanel = $("#prediction-forecast-panel"), forecastTable = $("#prediction-forecast-table");
         setLoading(loading, true);
         try {
             const [dashboard, payload] = await Promise.all([fetchJson("/dashboard/"), fetchJson("/predictions/?limit=365")]);
-            setOptions(select, dashboard.locations || [], false);
+            const locations = dashboard.locations || [];
             const records = payload.records || [];
-            const render = () => {
+            setOptions(select, locations, false);
+            if (!select.value && locations.length) select.value = locations[0].slug;
+
+            const renderStoredHistory = () => {
                 const filtered = records.filter(record => !select.value || record.location === select.value);
-                const latest = filtered[0];
-                if (latest) {
-                    card.hidden = false;
-                    $("#prediction-location-name").textContent = latest.location_name;
-                    $("#prediction-date").textContent = `Target date · ${formatDate(latest.target_date)} · feature date ${formatDate(latest.feature_date)}`;
-                    $("#prediction-value").textContent = formatHeat(latest.predicted_heat_index_celsius);
-                    $("#prediction-model").textContent = latest.model_name;
-                } else { card.hidden = true; }
                 $("#prediction-table").innerHTML = filtered.map(record => `<tr><td>${escapeHtml(record.location_name)}</td><td>${formatDate(record.feature_date)}</td><td>${formatDate(record.target_date)}</td><td>${formatHeat(record.predicted_heat_index_celsius)}</td><td>${escapeHtml(record.model_name)}</td></tr>`).join("") || '<tr><td colspan="5">No stored prediction records match this selection.</td></tr>';
+                const latest = filtered[0];
+                if (latest && !dateInput.value) dateInput.value = latest.feature_date;
             };
-            select.addEventListener("change", render); render();
+
+            const loadForecast = async () => {
+                hide(error);
+                if (!select.value || !dateInput.value) {
+                    showError(error, "Select a location and feature date first.");
+                    return;
+                }
+                setLoading(loading, true);
+                try {
+                    const params = new URLSearchParams({ location: select.value, feature_date: dateInput.value, horizon: "5" });
+                    const forecast = await fetchJson(`/predictions/forecast/?${params.toString()}`);
+                    const rows = forecast.records || [];
+                    const first = rows[0];
+                    if (!first) throw new Error("No forecast records were returned.");
+                    card.hidden = false;
+                    forecastPanel.hidden = false;
+                    $("#prediction-location-name").textContent = forecast.location_name;
+                    $("#prediction-date").textContent = `Feature date · ${formatDate(forecast.feature_date)} · horizons 1–${forecast.horizon_days} days`;
+                    $("#prediction-value").textContent = formatHeat(first.predicted_heat_index_celsius);
+                    $("#prediction-model").textContent = first.model_name;
+                    forecastTable.innerHTML = rows.map(row => `<tr><td>Day ${escapeHtml(row.horizon_days)}</td><td>${formatDate(row.target_date)}</td><td>${formatHeat(row.predicted_heat_index_celsius)}</td><td>${riskBadge(row.risk_category)}</td><td>${escapeHtml(row.model_name)}</td></tr>`).join("");
+                } catch (requestError) {
+                    card.hidden = true;
+                    forecastPanel.hidden = true;
+                    showError(error, requestError.message);
+                } finally { setLoading(loading, false); }
+            };
+
+            renderStoredHistory();
+            select.addEventListener("change", () => {
+                dateInput.value = records.find(record => record.location === select.value)?.feature_date || "";
+                renderStoredHistory();
+                loadForecast();
+            });
+            apply.addEventListener("click", loadForecast);
+            await loadForecast();
         } catch (requestError) { showError(error, requestError.message); }
         finally { setLoading(loading, false); }
     }

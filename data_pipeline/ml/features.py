@@ -9,6 +9,7 @@ import pandas as pd
 
 
 TARGET_COLUMN = "target_next_day_maximum_daytime_heat_index"
+MULTI_HORIZON_TARGET_COLUMN = "target_horizon_maximum_daytime_heat_index"
 DATE_COLUMN = "feature_date"
 TARGET_DATE_COLUMN = "target_date"
 LOCATION_COLUMN = "location_name"
@@ -129,6 +130,44 @@ def build_ml_dataset(daily: pd.DataFrame) -> pd.DataFrame:
     if result[FEATURE_COLUMNS].isna().any().any():
         raise ValueError("Feature engineering produced missing model inputs.")
     return result.sort_values([TARGET_DATE_COLUMN, "location_slug"]).reset_index(drop=True)
+
+
+def build_multi_horizon_dataset(daily: pd.DataFrame, horizon_days: int) -> pd.DataFrame:
+    """Build a direct forecast dataset for a bounded future horizon.
+
+    Features describe the selected complete day and prior observations only. The
+    target is the observed maximum daytime heat index exactly ``horizon_days``
+    calendar days later. Requiring an exact target date prevents gaps from being
+    silently treated as a shorter forecast horizon.
+    """
+    if not isinstance(horizon_days, int) or not 1 <= horizon_days <= 5:
+        raise ValueError("horizon_days must be an integer from 1 through 5.")
+
+    frame = build_feature_frame(daily)
+    target_source = frame[
+        [LOCATION_COLUMN, DATE_COLUMN, "maximum_daytime_heat_index"]
+    ].rename(
+        columns={
+            DATE_COLUMN: "target_date",
+            "maximum_daytime_heat_index": MULTI_HORIZON_TARGET_COLUMN,
+        }
+    )
+    result = frame.copy()
+    result[TARGET_DATE_COLUMN] = result[DATE_COLUMN] + pd.to_timedelta(int(horizon_days), unit="D")
+    result = result.drop(columns=[TARGET_COLUMN], errors="ignore")
+    result = result.merge(
+        target_source,
+        left_on=[LOCATION_COLUMN, TARGET_DATE_COLUMN],
+        right_on=[LOCATION_COLUMN, "target_date"],
+        how="inner",
+        suffixes=("", "_observed"),
+    )
+    result = result.drop(columns=["target_date_observed"], errors="ignore")
+    result["forecast_horizon_days"] = horizon_days
+    result = result.dropna(subset=[*NUMERIC_FEATURES, MULTI_HORIZON_TARGET_COLUMN])
+    if result[FEATURE_COLUMNS].isna().any().any():
+        raise ValueError("Multi-horizon feature engineering produced missing model inputs.")
+    return result.sort_values([TARGET_DATE_COLUMN, LOCATION_COLUMN]).reset_index(drop=True)
 
 
 def load_and_build_ml_dataset(path: Path) -> pd.DataFrame:
