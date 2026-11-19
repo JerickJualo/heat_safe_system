@@ -4,7 +4,7 @@ HeatSafe is a predictive heat-index monitoring and risk-analytics system for sel
 
 ## Current status
 
-Phase 5 is complete and awaiting approval. The project now contains the Phase 1 Django/PostgreSQL foundation, the Phase 2 programmatic ERA5 collection, Phase 3 preprocessing and exploratory analysis, Phase 4 next-day heat-index forecasting, and the Phase 5 Django/PostgreSQL backend integration.
+Phase 6 is complete and awaiting approval. The project now contains the Phase 1 Django/PostgreSQL foundation, the Phase 2 programmatic ERA5 collection, Phase 3 preprocessing and exploratory analysis, Phase 4 next-day heat-index forecasting, the Phase 5 Django/PostgreSQL backend integration, and the Phase 6 database-connected frontend.
 
 ## Development setup
 
@@ -102,3 +102,22 @@ Available JSON endpoints:
 ## Data attribution
 
 Historical weather data will be collected from the Open-Meteo Historical Weather API and attributed under its applicable CC BY 4.0 terms. The project will clearly distinguish modeled/reanalysis data from direct weather-station observations.
+
+## Website frontend
+
+Phase 6 provides four responsive pages backed by the Django JSON endpoints:
+
+- `/` — dashboard cards, latest complete summaries, and a historical trend chart.
+- `/analytics/` — location/date filters, summary statistics, risk distribution, and daily detail.
+- `/prediction/` — stored next-day model predictions and prediction history.
+- `/comparison/` — shared-date location comparison and ranking.
+
+The frontend uses a shared dark environmental-analytics design system and native SVG charts, so it does not depend on a third-party chart CDN. Values shown by the pages are loaded from PostgreSQL through `/api/`; placeholders use an em dash and are not demonstration results. The dashboard deliberately uses the latest complete daytime summary rather than an incomplete trailing day.
+
+Run the development server with:
+
+```powershell
+.\.venv\Scripts\python.exe manage.py runserver
+```
+
+Then open `http://127.0.0.1:8000/`.
