@@ -2,7 +2,7 @@
 
 ## Current phase
 
-Phase 3 — Data Preprocessing, Heat Index Calculation, and EDA (complete; awaiting approval before Phase 4)
+Phase 4 — Predictive Machine Learning Development (complete; awaiting approval before Phase 5)
 
 ## Phase 1 completed
 
@@ -21,7 +21,6 @@ Phase 3 — Data Preprocessing, Heat Index Calculation, and EDA (complete; await
 
 ## Pending
 
-- Machine-learning pipeline.
 - PostgreSQL application models and dashboard pages.
 
 ## Verification log
@@ -91,4 +90,28 @@ Phase 3 was implemented from the actual Phase 2 raw CSV files. No values were fa
 - Processed hourly files were checked for required columns, `+0800` timestamps, duplicate timestamps, missing-input flags, and actual sample rows.
 - Daily aggregation was checked for expected 24 hourly records and 7 daytime records per complete day.
 - EDA ran successfully and all 10 chart files were present and non-empty.
-- Phase 4 was not started.
+- Phase 4 had not started at the time of the Phase 3 verification.
+
+## Phase 4 predictive modeling update
+
+Phase 4 - Predictive Machine Learning Development (complete; awaiting approval before Phase 5)
+
+- Built 10,788 supervised next-day forecast rows from complete daily observations across the three locations.
+- Target: next calendar day's maximum daytime heat index in Celsius.
+- Added current-day weather features, one- and two-day heat-index lags, previous-only 3-day and 7-day rolling means, location encoding, and seasonal sine/cosine features.
+- Chronological split by target date: training 7,551 rows, validation 1,617 rows, and test 1,620 rows.
+- Evaluated persistence baseline, Linear Regression, Random Forest Regressor, and HistGradientBoosting Regressor.
+- Selected Linear Regression by lowest validation MAE of 1.2117 deg C.
+- Held-out test performance after refitting on training plus validation: MAE 1.2497 deg C, RMSE 1.6527 deg C, R2 0.6045.
+- Saved the Joblib model bundle, metadata, model comparison report, test predictions, and evaluation charts.
+- Verified saved-model loading and inference on actual recent valid history for Surigao City, Butuan City, and Davao City.
+- Phase 5 was not started.
+
+## Phase 4 verification log
+
+- `.venv\Scripts\python.exe scripts\train_heat_index_model.py` — completed successfully.
+- `.venv\Scripts\python.exe -m unittest discover -s tests -p "test_*.py" -v` — 10 tests passed.
+- Feature leakage checks passed: target and target date excluded from model inputs; rolling features use shifted observations.
+- Chronological split check passed with non-overlapping target-date ranges.
+- Saved Joblib artifact loaded successfully.
+- Actual recent-history inference returned numerical predictions for all three locations.

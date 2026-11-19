@@ -4,7 +4,7 @@ HeatSafe is a predictive heat-index monitoring and risk-analytics system for sel
 
 ## Current status
 
-Phase 3 is complete and awaiting approval. The project now contains the Phase 1 Django/PostgreSQL foundation, the Phase 2 programmatic ERA5 collection, and Phase 3 preprocessing, heat-index calculation, daily aggregation, and exploratory analysis. Machine learning and dashboard features have not started.
+Phase 4 is complete and awaiting approval. The project now contains the Phase 1 Django/PostgreSQL foundation, the Phase 2 programmatic ERA5 collection, Phase 3 preprocessing and exploratory analysis, and Phase 4 next-day heat-index forecasting. Dashboard features have not started.
 
 ## Development setup
 
@@ -63,6 +63,20 @@ EDA outputs are written to `data/processed/eda/`, including ten PNG charts, `eda
 ```powershell
 .\.venv\Scripts\python.exe -m unittest discover -s tests -p "test_*.py" -v
 ```
+
+## Predictive modeling
+
+Run the Phase 4 training pipeline from the project root:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\train_heat_index_model.py
+```
+
+The pipeline creates a leakage-aware supervised dataset from complete daily records. Each row uses current-day observations and lag/rolling history to predict the next calendar day's maximum daytime heat index. Rolling features use previous observations only. The split is chronological by target date: training, validation, then test.
+
+The persistence baseline and Linear Regression, Random Forest Regressor, and HistGradientBoosting Regressor are evaluated with MAE, RMSE, and R². The model with the lowest validation MAE is refit on training plus validation data and evaluated once on the held-out test period.
+
+Phase 4 outputs are written to `data/processed/ml/` and `models/phase4/`, including the engineered ML dataset, model comparison CSV, test predictions, metadata JSON, evaluation charts, and the Joblib model bundle. The reusable inference function is `predict_next_day_maximum_daytime_heat_index` in `data_pipeline/ml/inference.py`.
 
 ## Data attribution
 
