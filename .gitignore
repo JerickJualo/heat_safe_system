@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+db.sqlite3
+.env
+staticfiles/
+data/raw/*
+data/processed/*
+models/*.joblib
+models/*.pkl
+*.log
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.DS_Store
