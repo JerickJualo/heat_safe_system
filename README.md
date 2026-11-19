@@ -4,7 +4,7 @@ HeatSafe is a predictive heat-index monitoring and risk-analytics system for sel
 
 ## Current status
 
-Phase 1 is establishing the Django development environment, PostgreSQL configuration, project structure, and initial landing page. Historical data collection, heat-index processing, machine learning, and dashboard features are intentionally not part of this phase.
+Phase 3 is complete and awaiting approval. The project now contains the Phase 1 Django/PostgreSQL foundation, the Phase 2 programmatic ERA5 collection, and Phase 3 preprocessing, heat-index calculation, daily aggregation, and exploratory analysis. Machine learning and dashboard features have not started.
 
 ## Development setup
 
@@ -41,6 +41,28 @@ Generated artifacts include:
 - `data/raw/validation_report.json` — validation report.
 
 Open-Meteo data is modeled/reanalysis data and must not be described as direct local weather-station observations. Cite the [Open-Meteo Historical Weather API](https://open-meteo.com/en/docs/historical-weather-api), its [model availability documentation](https://open-meteo.com/en/docs/model-updates), and the underlying ERA5 data sources when presenting the data.
+
+## Preprocessing and exploratory analysis
+
+Run the Phase 3 preprocessing pipeline from the project root:
+
+```powershell
+.\.venv\Scripts\python.exe -m data_pipeline.preprocessing.run_preprocessing
+```
+
+This creates cleaned hourly files with NWS heat index values and PAGASA risk categories, valid-only hourly files, and a daily summary file under `data/processed/`. Incomplete trailing API rows remain visible and are flagged instead of being silently imputed. Daytime is defined as 10:00 through 16:00 Asia/Manila, inclusive.
+
+Generate the EDA charts and findings report with:
+
+```powershell
+.\.venv\Scripts\python.exe -m data_pipeline.analysis.run_eda
+```
+
+EDA outputs are written to `data/processed/eda/`, including ten PNG charts, `eda_summary.json`, and `eda_findings.md`. Heat-index unit tests are in `tests/test_heat_index.py` and can be run with:
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -s tests -p "test_*.py" -v
+```
 
 ## Data attribution
 

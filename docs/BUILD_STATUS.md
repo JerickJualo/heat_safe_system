@@ -2,9 +2,9 @@
 
 ## Current phase
 
-Phase 1 — Project Initialization and Development Environment
+Phase 3 — Data Preprocessing, Heat Index Calculation, and EDA (complete; awaiting approval before Phase 4)
 
-## Completed in this phase
+## Phase 1 completed
 
 - Initial Django project structure created.
 - Environment-based configuration prepared.
@@ -21,7 +21,6 @@ Phase 1 — Project Initialization and Development Environment
 
 ## Pending
 
-- Heat-index processing and exploratory analysis.
 - Machine-learning pipeline.
 - PostgreSQL application models and dashboard pages.
 
@@ -32,9 +31,9 @@ Phase 1 — Project Initialization and Development Environment
 - `.venv\Scripts\python.exe -m pip check` — `No broken requirements found.`
 - `.venv\Scripts\python.exe -m django --version` — Django `5.2.19`.
 - `.venv\Scripts\python.exe manage.py check` — no issues detected.
-- `.venv\Scripts\python.exe manage.py migrate --noinput` — built-in migrations applied successfully using the SQLite fallback.
+- `.venv\Scripts\python.exe manage.py migrate --noinput` — initial built-in migrations applied with the SQLite fallback; PostgreSQL migrations were verified subsequently.
 - `pg_isready -h localhost -p 5432` — PostgreSQL accepting connections.
-- `psql -h localhost -U postgres -d postgres -w ...` — server reachable, but application credentials are not configured; PostgreSQL authentication requires a password.
+- `psql -h localhost -U postgres -d postgres -w ...` — PostgreSQL server reachable; application credentials are configured in `.env`.
 - `.venv\Scripts\python.exe manage.py runserver 127.0.0.1:8000 --noreload` — server started successfully.
 - `Invoke-WebRequest http://127.0.0.1:8000/` — HTTP `200`; HeatSafe page content confirmed.
 
@@ -44,9 +43,9 @@ The local PostgreSQL service is running and Django is configured to use the `hea
 
 ## Phase 2 collection update
 
-## Current active phase
+## Phase 2 status
 
-Phase 2 - Historical Dataset Collection (complete; awaiting approval before Phase 3)
+Phase 2 - Historical Dataset Collection (complete; approved before Phase 3)
 
 Phase 2 collection completed successfully using the Open-Meteo Historical Weather API and the explicit ERA5 model.
 
@@ -64,3 +63,32 @@ Phase 2 collection completed successfully using the Open-Meteo Historical Weathe
 ## PostgreSQL configuration update
 
 The previous limitation is now resolved. The local `.env` contains the PostgreSQL password, the `heatsafe` database has been created, and Django successfully connected as user `postgres` and applied all built-in migrations against PostgreSQL.
+
+## Phase 3 preprocessing and EDA update
+
+## Phase 3 status
+
+Phase 3 - Data Preprocessing, Heat Index Calculation, and EDA (complete; awaiting approval before Phase 4)
+
+Phase 3 was implemented from the actual Phase 2 raw CSV files. No values were fabricated and no future 2026 values were filled.
+
+- NWS heat index calculation implemented with the simple formula, Rothfusz regression, and documented low- and high-humidity adjustments.
+- PAGASA heat-index categories implemented with tested boundary values: `<27` Not Hazardous, `27-32` Caution, `33-41` Extreme Caution, `42-51` Danger, and `>=52` Extreme Danger.
+- Timestamps are preserved as Asia/Manila local timestamps with a `+08:00` offset.
+- All three locations produced 86,640 processed hourly rows, including 86,504 valid rows and 136 flagged missing-input rows.
+- Quality flags identified 136 `missing_required_input` rows per location; no invalid-range rows and no duplicate timestamps were found.
+- Daily output contains 10,830 location-days, of which 10,812 have complete 24-hour and 10:00-16:00 daytime coverage.
+- EDA analyzed 259,512 valid hourly records and 10,812 complete daytime daily records.
+- Ten PNG charts, `eda_summary.json`, and `eda_findings.md` were generated under `data/processed/eda/`.
+- Highest complete daytime heat index: 46.982 deg C in Surigao City on 2017-09-03.
+- Mean daily peak daytime heat index: Surigao City 38.266 deg C, Davao City 36.621 deg C, Butuan City 36.173 deg C.
+- High-risk complete daytime days: Surigao City 239, Davao City 6, Butuan City 1.
+
+## Phase 3 verification log
+
+- `.venv\Scripts\python.exe -m unittest discover -s tests -p "test_*.py" -v` — 7 tests passed.
+- Phase 3 modules compiled successfully with `py_compile`.
+- Processed hourly files were checked for required columns, `+0800` timestamps, duplicate timestamps, missing-input flags, and actual sample rows.
+- Daily aggregation was checked for expected 24 hourly records and 7 daytime records per complete day.
+- EDA ran successfully and all 10 chart files were present and non-empty.
+- Phase 4 was not started.
