@@ -55,7 +55,12 @@ def dashboard_data(request):
     locations = Location.objects.filter(is_active=True)
     payload = []
     for location in locations:
-        latest = location.daily_summaries.order_by("-local_date").first()
+        latest = (
+            location.daily_summaries
+            .filter(daytime_complete=True)
+            .order_by("-local_date")
+            .first()
+        )
         prediction = location.predictions.order_by("-target_date").first()
         payload.append(
             {

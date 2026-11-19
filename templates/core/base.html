@@ -1,0 +1,49 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="HeatSafe historical heat-index monitoring and prediction analytics.">
+    <title>{{ page_title|default:"HeatSafe" }} | HeatSafe</title>
+    <link rel="stylesheet" href="{% static 'css/site.css' %}">
+</head>
+<body data-page="{{ page_id|default:'dashboard' }}">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <div class="app-shell">
+        <aside class="sidebar" id="app-sidebar" aria-label="Primary navigation">
+            <div class="brand-lockup">
+                <span class="brand-mark" aria-hidden="true">HS</span>
+                <span>
+                    <strong>HeatSafe</strong>
+                    <small>Climate intelligence</small>
+                </span>
+            </div>
+            <nav class="primary-nav">
+                <p class="nav-label">Workspace</p>
+                <a class="nav-link {% if page_id == 'dashboard' %}is-active{% endif %}" href="{% url 'core:dashboard' %}"><span aria-hidden="true">⌂</span>Dashboard</a>
+                <a class="nav-link {% if page_id == 'analytics' %}is-active{% endif %}" href="{% url 'core:analytics' %}"><span aria-hidden="true">◒</span>Data Analytics</a>
+                <a class="nav-link {% if page_id == 'prediction' %}is-active{% endif %}" href="{% url 'core:prediction' %}"><span aria-hidden="true">↗</span>Heat Prediction</a>
+                <a class="nav-link {% if page_id == 'comparison' %}is-active{% endif %}" href="{% url 'core:comparison' %}"><span aria-hidden="true">⇄</span>Compare Locations</a>
+            </nav>
+            <div class="sidebar-note">
+                <span class="status-dot"></span>
+                <div><strong>Data services online</strong><small>PostgreSQL connected</small></div>
+            </div>
+        </aside>
+        <div class="app-main">
+            <header class="topbar">
+                <button class="menu-toggle" id="menu-toggle" type="button" aria-controls="app-sidebar" aria-expanded="false">☰ <span>Menu</span></button>
+                <div class="topbar-context"><span class="context-kicker">PHILIPPINES · ASIA/MANILA</span><span class="context-date" id="current-date"></span></div>
+                <span class="live-badge"><span class="status-dot"></span>Live data</span>
+            </header>
+            <main class="page-content" id="main-content">
+                {% block content %}{% endblock %}
+            </main>
+            <footer class="site-footer">HeatSafe · Historical observations and next-day heat-index intelligence</footer>
+        </div>
+    </div>
+    <div class="toast toast-error" id="global-error" role="alert" hidden></div>
+    <script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>

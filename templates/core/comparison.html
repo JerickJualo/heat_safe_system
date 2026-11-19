@@ -1,0 +1,8 @@
+{% extends "core/base.html" %}
+{% block content %}
+<section class="page-heading"><div><p class="eyebrow">COMPARISON</p><h1>See the network together.</h1><p class="page-subtitle">Compare complete daily heat-index summaries for Surigao City, Butuan City, and Davao City.</p></div><div class="data-source-chip"><span class="status-dot"></span>Shared comparison date</div></section>
+<section class="toolbar" aria-label="Comparison filters"><label class="field-label" for="comparison-date">Comparison date<input id="comparison-date" type="date"></label><button class="button button-primary" id="comparison-apply" type="button">Compare date</button><span class="toolbar-note" id="comparison-note">Finding the latest common complete date…</span></section>
+<div class="loading-state" id="comparison-loading"><span class="spinner"></span> Loading comparison…</div><div class="error-state" id="comparison-error" hidden></div>
+<section class="metric-grid" id="comparison-cards"></section>
+<section class="content-grid comparison-grid"><article class="panel panel-wide"><div class="panel-heading"><div><p class="eyebrow">SIDE BY SIDE</p><h2>Maximum daytime heat index</h2></div><span class="panel-meta" id="comparison-date-label">—</span></div><div class="chart-frame chart-frame-short" id="comparison-chart"></div></article><article class="panel"><div class="panel-heading"><div><p class="eyebrow">DETAIL</p><h2>Location ranking</h2></div></div><div class="table-wrap"><table><thead><tr><th>Location</th><th>Max HI</th><th>Risk</th></tr></thead><tbody id="comparison-table"></tbody></table></div></article></section>
+{% endblock %}

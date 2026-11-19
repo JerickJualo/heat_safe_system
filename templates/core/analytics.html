@@ -1,0 +1,19 @@
+{% extends "core/base.html" %}
+{% block content %}
+<section class="page-heading"><div><p class="eyebrow">ANALYTICS</p><h1>Understand the pattern.</h1><p class="page-subtitle">Explore complete daily weather summaries from the collected historical record.</p></div><div class="data-source-chip"><span class="status-dot"></span>Actual collected data</div></section>
+<section class="toolbar filter-toolbar" aria-label="Analytics filters">
+    <label class="field-label" for="analytics-location">Location<select id="analytics-location"><option value="">All locations</option></select></label>
+    <label class="field-label" for="analytics-start">From<input id="analytics-start" type="date"></label>
+    <label class="field-label" for="analytics-end">To<input id="analytics-end" type="date"></label>
+    <button class="button button-primary" id="analytics-apply" type="button">Apply filters</button>
+</section>
+<div class="loading-state" id="analytics-loading"><span class="spinner"></span> Loading analytics…</div><div class="error-state" id="analytics-error" hidden></div>
+<section class="metric-grid metric-grid-four" aria-live="polite">
+    <article class="metric-card"><span class="metric-label">Complete days</span><strong id="analytics-record-count">—</strong><span class="metric-caption">Within selected range</span></article>
+    <article class="metric-card"><span class="metric-label">Average maximum HI</span><strong id="analytics-mean-hi">—</strong><span class="metric-caption">Across returned days</span></article>
+    <article class="metric-card metric-card-hot"><span class="metric-label">Peak maximum HI</span><strong id="analytics-peak-hi">—</strong><span class="metric-caption">Observed in selected data</span></article>
+    <article class="metric-card"><span class="metric-label">Danger-level days</span><strong id="analytics-high-risk-days">—</strong><span class="metric-caption">Danger or extreme danger</span></article>
+</section>
+<section class="content-grid analytics-grid"><article class="panel panel-wide"><div class="panel-heading"><div><p class="eyebrow">TIME SERIES</p><h2>Daily maximum daytime heat index</h2></div><span class="panel-meta" id="analytics-range-label">Selected range</span></div><div class="chart-frame" id="analytics-chart"></div></article><article class="panel"><div class="panel-heading"><div><p class="eyebrow">RISK MIX</p><h2>Classification count</h2></div></div><div class="chart-frame chart-frame-short" id="analytics-risk-chart"></div></article></section>
+<section class="panel"><div class="panel-heading"><div><p class="eyebrow">DETAIL</p><h2>Returned daily summaries</h2></div><span class="panel-meta">First 100 records shown</span></div><div class="table-wrap"><table><thead><tr><th>Location</th><th>Date</th><th>Max HI</th><th>Avg HI</th><th>Risk</th><th>Quality</th></tr></thead><tbody id="analytics-table"></tbody></table></div></section>
+{% endblock %}

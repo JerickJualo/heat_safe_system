@@ -1,0 +1,18 @@
+{% extends "core/base.html" %}
+{% block content %}
+<section class="page-heading">
+    <div><p class="eyebrow">OVERVIEW</p><h1>Heat risk, at a glance.</h1><p class="page-subtitle">Monitor recent complete daytime conditions and stored next-day predictions across the HeatSafe network.</p></div>
+    <div class="data-source-chip"><span class="status-dot"></span>Database-connected view</div>
+</section>
+<section class="toolbar" aria-label="Dashboard filters">
+    <label class="field-label" for="dashboard-location-filter">Location<select id="dashboard-location-filter"><option value="">All locations</option></select></label>
+    <span class="toolbar-note" id="dashboard-updated">Loading current dataset…</span>
+</section>
+<div class="loading-state" id="dashboard-loading"><span class="spinner"></span> Loading dashboard data…</div>
+<div class="error-state" id="dashboard-error" hidden></div>
+<section class="metric-grid" id="dashboard-cards" aria-live="polite"></section>
+<section class="content-grid dashboard-grid">
+    <article class="panel panel-wide"><div class="panel-heading"><div><p class="eyebrow">TREND</p><h2>Maximum daytime heat index</h2></div><span class="panel-meta">Complete daily summaries</span></div><div class="chart-frame" id="dashboard-trend-chart" aria-label="Daily maximum daytime heat index chart"></div></article>
+    <article class="panel"><div class="panel-heading"><div><p class="eyebrow">RECENT RECORDS</p><h2>Latest observations</h2></div></div><div class="table-wrap"><table><thead><tr><th>Location</th><th>Date</th><th>Max HI</th><th>Risk</th></tr></thead><tbody id="dashboard-latest-table"></tbody></table></div></article>
+</section>
+{% endblock %}
