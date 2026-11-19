@@ -4,7 +4,9 @@ HeatSafe is a predictive heat-index monitoring and risk-analytics system for sel
 
 ## Current status
 
-Phase 9 is complete and awaiting approval. The project now contains the Phase 1 Django/PostgreSQL foundation, the Phase 2 programmatic ERA5 collection, Phase 3 preprocessing and exploratory analysis, Phase 4 next-day heat-index forecasting, the Phase 5 Django/PostgreSQL backend integration, the Phase 6 database-connected frontend, Phase 7 model-performance and reporting features, Phase 8 testing/security/optimization updates, and Phase 9 academic documentation and deployment preparation.
+Phase 9 documentation is complete and awaiting approval. The project contains the Phase 1 Django/PostgreSQL foundation, the Phase 2 programmatic ERA5 collection, Phase 3 preprocessing and exploratory analysis, Phase 4 next-day heat-index forecasting, the Phase 5 Django/PostgreSQL backend integration, the Phase 6 database-connected frontend, Phase 7 model-performance and reporting features, Phase 8 testing/security/optimization updates, and Phase 9 academic documentation and deployment preparation.
+
+The current project is ready for local testing and academic demonstration. Production deployment still requires a hosting provider, production environment variables, HTTPS, a production application server, static-file serving, and an operational backup plan. See [Deployment and installation](docs/DEPLOYMENT.md).
 
 ## Development setup
 
@@ -35,7 +37,7 @@ The project documentation is organized as follows:
 
 ## Historical data collection
 
-Phase 2 collects hourly historical weather data programmatically from the Open-Meteo Historical Weather API. No manual CSV download is required.
+The Phase 2 collector retrieves hourly historical weather data programmatically from the Open-Meteo Historical Weather API. No manual CSV download is required.
 
 Run the collector from the project root with the virtual environment active:
 
@@ -118,18 +120,20 @@ Available JSON endpoints:
 
 ## Data attribution
 
-Historical weather data will be collected from the Open-Meteo Historical Weather API and attributed under its applicable CC BY 4.0 terms. The project will clearly distinguish modeled/reanalysis data from direct weather-station observations.
+Historical weather data is collected from the Open-Meteo Historical Weather API and attributed under its applicable CC BY 4.0 terms. The project distinguishes modeled/reanalysis data from direct weather-station observations.
 
 ## Website frontend
 
-Phase 6 provides four responsive pages backed by the Django JSON endpoints:
+The application provides six responsive pages backed by the Django JSON endpoints:
 
 - `/` — dashboard cards, latest complete summaries, and a historical trend chart.
 - `/analytics/` — location/date filters, summary statistics, risk distribution, and daily detail.
 - `/prediction/` — stored next-day model predictions and prediction history.
 - `/comparison/` — shared-date location comparison and ranking.
+- `/performance/` — candidate-model metrics and actual-versus-predicted results.
+- `/reports/` — database counts, methodology, limitations, attribution, and CSV export.
 
-The frontend uses a shared dark environmental-analytics design system and native SVG charts, so it does not depend on a third-party chart CDN. Values shown by the pages are loaded from PostgreSQL through `/api/`; placeholders use an em dash and are not demonstration results. The dashboard deliberately uses the latest complete daytime summary rather than an incomplete trailing day.
+The frontend uses a shared dark environmental-analytics design system and native SVG charts, so it does not depend on a third-party chart CDN. Values shown by the pages are loaded from PostgreSQL through `/api/`; placeholders use an em dash and are not demonstration results. The dashboard deliberately uses the latest complete daytime summary rather than an incomplete trailing day. The application does not need to recollect data or retrain the model on every startup.
 
 Run the development server with:
 
@@ -141,7 +145,7 @@ Then open `http://127.0.0.1:8000/`.
 
 ## Model performance and reports
 
-Phase 7 adds two final pages:
+The model-performance and reports area includes two additional pages:
 
 - `/performance/` — validation/test MAE, RMSE, and R² for the persistence baseline, Linear Regression, Random Forest, and HistGradientBoosting candidates, plus a native SVG actual-versus-predicted view using the 1,620-row held-out test artifact.
 - `/reports/` — PostgreSQL record counts, data-source attribution, methodology, limitations, and filtered daily CSV export controls.
