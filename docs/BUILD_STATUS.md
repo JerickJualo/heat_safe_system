@@ -15,11 +15,12 @@ Phase 1 — Project Initialization and Development Environment
 - Phase 1 dependencies installed and import-verified.
 - Django system checks and initial migrations completed.
 - Landing page verified through a local HTTP request.
+- PostgreSQL credentials configured in local `.env`.
+- PostgreSQL `heatsafe` database created.
+- Django migrations verified against PostgreSQL.
 
 ## Pending
 
-- PostgreSQL database credentials and `heatsafe` database setup.
-- Historical weather data collection.
 - Heat-index processing and exploratory analysis.
 - Machine-learning pipeline.
 - PostgreSQL application models and dashboard pages.
@@ -37,6 +38,29 @@ Phase 1 — Project Initialization and Development Environment
 - `.venv\Scripts\python.exe manage.py runserver 127.0.0.1:8000 --noreload` — server started successfully.
 - `Invoke-WebRequest http://127.0.0.1:8000/` — HTTP `200`; HeatSafe page content confirmed.
 
-## Known Phase 1 limitation
+## Database status
 
-The local PostgreSQL service is running, but no PostgreSQL password was available in the environment. The project is configured for PostgreSQL through `.env.example`; until local credentials and a `heatsafe` database are supplied, the default SQLite fallback is used for development verification.
+The local PostgreSQL service is running and Django is configured to use the `heatsafe` PostgreSQL database. The local password remains in `.env`, which is excluded from Git.
+
+## Phase 2 collection update
+
+## Current active phase
+
+Phase 2 - Historical Dataset Collection (complete; awaiting approval before Phase 3)
+
+Phase 2 collection completed successfully using the Open-Meteo Historical Weather API and the explicit ERA5 model.
+
+- Locations collected: Surigao City, Butuan City, and Davao City.
+- Complete coverage: January 1, 2017 through December 31, 2025.
+- 2026 requested through November 19, 2026, but actual non-null coverage ends at November 14, 2026 07:00 Asia/Manila.
+- Raw rows per location: 86,640.
+- Usable non-null rows per location: 86,504.
+- Trailing null rows per location: 136, consistent with the official ERA5 five-day update delay.
+- Missing timestamps in the complete 2017-2025 period: 0 per location.
+- Duplicate timestamps removed: 0 per location.
+- Validation status: passed for all locations.
+- Collection outputs are stored under `data/raw/`.
+
+## PostgreSQL configuration update
+
+The previous limitation is now resolved. The local `.env` contains the PostgreSQL password, the `heatsafe` database has been created, and Django successfully connected as user `postgres` and applied all built-in migrations against PostgreSQL.
