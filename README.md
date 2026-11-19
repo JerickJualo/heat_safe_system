@@ -4,7 +4,7 @@ HeatSafe is a predictive heat-index monitoring and risk-analytics system for sel
 
 ## Current status
 
-Phase 7 is complete and awaiting approval. The project now contains the Phase 1 Django/PostgreSQL foundation, the Phase 2 programmatic ERA5 collection, Phase 3 preprocessing and exploratory analysis, Phase 4 next-day heat-index forecasting, the Phase 5 Django/PostgreSQL backend integration, the Phase 6 database-connected frontend, and Phase 7 model-performance and reporting features.
+Phase 9 is complete and awaiting approval. The project now contains the Phase 1 Django/PostgreSQL foundation, the Phase 2 programmatic ERA5 collection, Phase 3 preprocessing and exploratory analysis, Phase 4 next-day heat-index forecasting, the Phase 5 Django/PostgreSQL backend integration, the Phase 6 database-connected frontend, Phase 7 model-performance and reporting features, Phase 8 testing/security/optimization updates, and Phase 9 academic documentation and deployment preparation.
 
 ## Development setup
 
@@ -17,6 +17,21 @@ Phase 7 is complete and awaiting approval. The project now contains the Phase 1 
 7. Start the site with `python manage.py runserver`.
 
 If `.env` is not present, the project uses a local SQLite fallback so the initial Django shell and landing page can be verified before PostgreSQL credentials are configured. The intended application database is PostgreSQL.
+
+## Documentation map
+
+The project documentation is organized as follows:
+
+- [Deployment and installation](docs/DEPLOYMENT.md)
+- [Data collection and preprocessing methodology](docs/DATA_METHODOLOGY.md)
+- [Machine-learning methodology](docs/ML_METHODOLOGY.md)
+- [Database structure and import behavior](docs/DATABASE.md)
+- [API reference](docs/API.md)
+- [System architecture](docs/ARCHITECTURE.md)
+- [Testing and security report](docs/TESTING_REPORT.md)
+- [Demonstration checklist](docs/DEMONSTRATION_CHECKLIST.md)
+- [Final project summary](docs/FINAL_SUMMARY.md)
+- [Historical build status](docs/BUILD_STATUS.md)
 
 ## Historical data collection
 
@@ -132,3 +147,11 @@ Phase 7 adds two final pages:
 - `/reports/` — PostgreSQL record counts, data-source attribution, methodology, limitations, and filtered daily CSV export controls.
 
 The selected model remains Linear Regression. Its held-out test results are MAE 1.2497°C, RMSE 1.6527°C, and R² 0.6045, read from the imported evaluation records. PDF export was intentionally not added because the project has no verified PDF-generation dependency; CSV export is implemented and tested.
+
+## Testing, security, and optimization
+
+Phase 8 verification includes Django system checks, production deployment checks, Python unit tests for heat-index formulas and leakage-aware ML features, backend/database tests, CSRF and input-validation tests, JavaScript syntax validation, dependency checks, and Python compilation checks.
+
+Production mode now requires a sufficiently long `DJANGO_SECRET_KEY`, supports explicit CSRF trusted origins, enables secure cookies/HSTS defaults when `DJANGO_DEBUG=False`, and keeps `.env` excluded from Git. API inputs are validated before ORM filtering, POST prediction generation remains protected by Django CSRF middleware, and database access uses Django ORM queries with bounded analytics limits and streaming CSV export.
+
+Plotly was removed because the application uses native SVG charts and Matplotlib/Seaborn for EDA. Prediction generation now loads the Joblib model once per import operation instead of once per location.

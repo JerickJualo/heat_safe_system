@@ -28,7 +28,13 @@ def prepare_next_day_features(history: pd.DataFrame) -> pd.DataFrame:
 
 
 def predict_next_day_maximum_daytime_heat_index(model_path: Path, history: pd.DataFrame) -> float:
-    bundle = load_model_bundle(model_path)
+    return predict_with_model_bundle(load_model_bundle(model_path), history)
+
+
+def predict_with_model_bundle(bundle: dict, history: pd.DataFrame) -> float:
+    """Predict from an already-loaded bundle to avoid repeated disk loads."""
+    if not isinstance(bundle, dict) or "model" not in bundle or "feature_columns" not in bundle:
+        raise ValueError("Saved model artifact does not contain a usable model bundle.")
     features = prepare_next_day_features(history)
     feature_columns = bundle["feature_columns"]
     prediction = bundle["model"].predict(features[feature_columns])

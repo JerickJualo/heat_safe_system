@@ -9,6 +9,8 @@ data/raw/*
 data/processed/*
 models/*.joblib
 models/*.pkl
+models/**/*.joblib
+models/**/*.pkl
 *.log
 .pytest_cache/
 .mypy_cache/

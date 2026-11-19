@@ -1,6 +1,6 @@
 from datetime import date
 
-from django.test import TestCase
+from django.test import Client, TestCase
 
 from .models import DailyWeatherSummary, Location, ModelEvaluation, PredictionRecord, WeatherRecord
 
@@ -95,4 +95,13 @@ class WeatherApiTests(TestCase):
         csv_body = b"".join(response.streaming_content).decode("utf-8")
         self.assertIn("location,location_name,date", csv_body)
         self.assertIn("test_city,Test City,2026-01-02", csv_body)
+
+    def test_input_validation_and_csrf_protection(self):
+        response = self.client.get("/api/analytics/?start_date=2026-01-03&end_date=2026-01-01")
+        self.assertEqual(response.status_code, 400)
+        response = self.client.get("/api/export/daily.csv?start_date=not-a-date")
+        self.assertEqual(response.status_code, 400)
+        csrf_client = Client(enforce_csrf_checks=True)
+        response = csrf_client.post("/api/predictions/generate/")
+        self.assertEqual(response.status_code, 403)
 

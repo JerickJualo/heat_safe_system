@@ -12,7 +12,7 @@ import pandas as pd
 from django.db import transaction
 from django.utils import timezone
 
-from data_pipeline.ml.inference import predict_next_day_maximum_daytime_heat_index, prepare_next_day_features
+from data_pipeline.ml.inference import predict_with_model_bundle, prepare_next_day_features
 
 from .models import DailyWeatherSummary, HeatIndexRecord, Location, ModelEvaluation, PredictionRecord, WeatherRecord
 
@@ -258,7 +258,7 @@ def generate_and_store_predictions(locations: dict[str, Location]) -> int:
     for location in locations.values():
         history = daily[daily["location_name"] == location.name].copy()
         features = prepare_next_day_features(history)
-        prediction = predict_next_day_maximum_daytime_heat_index(MODEL_PATH, history)
+        prediction = predict_with_model_bundle(bundle, history)
         feature_date = features["feature_date"].iloc[0].date()
         target_date = (pd.Timestamp(feature_date) + pd.Timedelta(value=1, unit="D")).date()
         PredictionRecord.objects.update_or_create(

@@ -167,7 +167,8 @@ def location_comparison(request):
     summaries = DailyWeatherSummary.objects.select_related("location").filter(
         local_date=requested_date, daytime_complete=True, location__is_active=True
     ).order_by("location__name")
-    if not summaries.exists():
+    summaries = list(summaries)
+    if not summaries:
         return _error("No complete daily summaries exist for the requested date.", 404)
     return JsonResponse({"date": requested_date.isoformat(), "locations": [_daily_payload(item) for item in summaries]})
 

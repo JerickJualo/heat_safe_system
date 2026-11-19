@@ -2,7 +2,7 @@
 
 ## Current phase
 
-Phase 7 — Model Performance, Reports, and Final Website Features (complete; awaiting approval)
+Phase 9 — Documentation, Deployment Preparation, and Final Delivery (complete; awaiting approval)
 
 ## Phase 1 completed
 
@@ -21,7 +21,7 @@ Phase 7 — Model Performance, Reports, and Final Website Features (complete; aw
 
 ## Pending
 
-- No further phase work is started; awaiting approval of Phase 7.
+- No further phase work is started; awaiting approval of Phase 9.
 
 ## Verification log
 
@@ -179,6 +179,32 @@ Phase 7 - Model Performance, Reports, and Final Website Features (complete; awai
 - `/api/report/` returned PostgreSQL-backed counts: 3 locations, 259,920 weather records, 259,512 heat-index records, 10,830 daily summaries, and 3 stored predictions.
 - Filtered CSV export for Davao City, 2025-01-01 through 2025-01-02 returned a header plus the two expected daily records.
 
+## Phase 8 testing, security, and optimization update
+
+Phase 8 - Testing, Security, Optimization, and Bug Fixes (complete; awaiting approval)
+
+- Added production-safe settings validation: production requires a long secret key and non-empty allowed hosts; secure cookies, HSTS, content-type protection, referrer policy, and frame protection are configured.
+- Added explicit CSRF trusted-origin configuration while retaining Django CSRF middleware protection.
+- Added recursive ignore rules for nested Joblib/Pickle model artifacts and confirmed `.env` remains ignored.
+- Removed unused Plotly from `requirements.txt` and the virtual environment; `pip check` remains clean.
+- Optimized stored prediction generation to load the model bundle once per import operation.
+- Reduced the location-comparison endpoint from an existence query plus fetch to one materialized query.
+- Added validation and CSRF tests for API error handling and protected POST behavior.
+
+## Phase 8 verification log
+
+- `manage.py check` — passed with no issues.
+- `manage.py check --deploy` with production-style environment variables — passed with no issues.
+- Python unit tests — 12 passed, covering cleaning, timezone/coverage flags, daily aggregation, heat-index formulas, PAGASA boundaries, ML leakage, chronological splits, and rolling features.
+- Django backend/frontend tests — 8 passed, including API, database, frontend routes, CSV export, validation, and CSRF checks.
+- `pip check` — no broken requirements.
+- Python `compileall` — passed.
+- `node --check static\js\app.js` — passed.
+- `makemigrations --check --dry-run` — no changes detected.
+- `migrate --check` — no unapplied migrations.
+- Import verification for Django, NumPy, pandas, requests, psycopg, scikit-learn, Matplotlib, Seaborn, Joblib, and python-dotenv — passed.
+- Responsive CSS audit confirmed mobile breakpoints and mobile sidebar behavior are present. Automated visual browser inspection was not available in this run, so no screenshot-based claim is made.
+
 ## Phase 4 verification log
 
 - `.venv\Scripts\python.exe scripts\train_heat_index_model.py` — completed successfully.
@@ -187,3 +213,17 @@ Phase 7 - Model Performance, Reports, and Final Website Features (complete; awai
 - Chronological split check passed with non-overlapping target-date ranges.
 - Saved Joblib artifact loaded successfully.
 - Actual recent-history inference returned numerical predictions for all three locations.
+
+## Phase 9 completed
+
+- Completed the README with installation, environment, data, ML, backend, frontend, reporting, testing, and demonstration instructions.
+- Added `docs/DEPLOYMENT.md` with clean-environment setup, PostgreSQL configuration, pipeline execution, update procedures, and production preparation notes.
+- Added `docs/DATA_METHODOLOGY.md` documenting Open-Meteo ERA5 collection, Asia/Manila timestamps, 2017–2025 complete coverage, 2026 partial coverage, preprocessing, heat-index calculation, and data limitations.
+- Added `docs/ML_METHODOLOGY.md` documenting the prediction target, feature availability, leakage controls, chronological splits, candidate models, evaluation metrics, and inference artifact.
+- Added `docs/DATABASE.md` documenting the PostgreSQL schema, relationships, import command, idempotency, and verified record counts.
+- Added `docs/API.md` documenting the public JSON endpoints, filters, validation behavior, and data attribution.
+- Added `docs/ARCHITECTURE.md` with the system architecture diagram and repository data-flow boundaries.
+- Added `docs/TESTING_REPORT.md` with the final automated verification results and known visual-testing limitation.
+- Added `docs/DEMONSTRATION_CHECKLIST.md` with a concise academic presentation walkthrough and recovery notes.
+- Added `docs/FINAL_SUMMARY.md` with the project purpose, completed capabilities, model result, reproducibility notes, and limitations.
+- The documented setup and execution entry points were checked against the working `.venv`, Django project, PostgreSQL database, data artifacts, model artifact, and current test suite. The full remote collection and model retraining sequence was not rerun during documentation work because it would overwrite the already verified generated artifacts; the exact commands remain documented for a deliberate refresh.
